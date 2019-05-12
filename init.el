@@ -6,3 +6,4 @@
 ;;; initialize packaging before configuration
 (require 'init-packaging)
 (require 'init-appearance)
+(require 'init-editor)

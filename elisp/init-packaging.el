@@ -1,6 +1,6 @@
 (provide 'init-packaging)
-
 (require 'package)
+
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
        (proto (if no-ssl "http" "https")))
@@ -10,6 +10,7 @@
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+(package-initialize)
 
 ;; install use-package if needed
 (unless (package-installed-p 'use-package)

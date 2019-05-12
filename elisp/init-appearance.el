@@ -16,3 +16,6 @@
 (use-package night-owl-theme
   :config
   (load-theme 'night-owl t))
+
+;; font
+(add-to-list 'default-frame-alist '(font . "gohufont-11"))

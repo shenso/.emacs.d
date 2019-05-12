@@ -18,3 +18,6 @@
 
 ;; obey column 80 limit
 (setq-default fill-column 80)
+
+;; magit
+(use-package magit)

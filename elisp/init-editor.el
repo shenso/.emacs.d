@@ -15,3 +15,6 @@
   :config
   (setq neo-theme 'arrow)
   (global-set-key [f8] 'neotree-toggle))
+
+;; obey column 80 limit
+(setq-default fill-column 80)

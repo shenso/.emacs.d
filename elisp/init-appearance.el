@@ -19,3 +19,16 @@
 
 ;; font
 (add-to-list 'default-frame-alist '(font . "gohufont-11"))
+
+;; column 80 ruler
+(use-package fill-column-indicator
+  :config
+  (setq fci-rule-width 1
+	fci-rule-color "gray"
+	fci-rule-column 80)
+  (add-hook 'prog-mode-hook 'fci-mode))
+;; post-column 80 highlighting
+(require 'whitespace)
+(setq whitespace-line-column 80
+      whitespace-style '(face lines-tail))
+(add-hook 'prog-mode-hook 'whitespace-mode)

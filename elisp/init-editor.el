@@ -21,3 +21,6 @@
 
 ;; magit
 (use-package magit)
+
+;; sudo-edit
+(use-package sudo-edit)

@@ -1,5 +1,3 @@
-(provide 'init-org)
-
 ;; org-crypt
 (require 'org-crypt)
 (setq org-crypt-key "shawnhenson@knights.ucf.edu")

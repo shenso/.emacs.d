@@ -1,5 +1,3 @@
-(provide 'init-appearance)
-
 ;; disable toolbar/gui stuff
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)

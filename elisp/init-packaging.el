@@ -1,4 +1,3 @@
-(provide 'init-packaging)
 (require 'package)
 
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))

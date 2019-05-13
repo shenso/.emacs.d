@@ -4,7 +4,7 @@
 ;; load startup scripts
 (add-to-list 'load-path "~/.emacs.d/elisp")
 ;;; initialize packaging before configuration
-(require 'init-packaging)
-(require 'init-appearance)
-(require 'init-editor)
-(require 'init-org)
+(load "init-packaging")
+(load "init-appearance")
+(load "init-editor")
+(load "init-org")

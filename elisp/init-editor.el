@@ -1,5 +1,4 @@
 ;; general emacs/editor configurations
-(provide 'init-editor)
 
 ;; move backup files to ~/.emacs.d/.backups
 (setq backup-directory-alist `(("." . "~/.emacs.d/.backups"))

@@ -7,3 +7,4 @@
 (require 'init-packaging)
 (require 'init-appearance)
 (require 'init-editor)
+(require 'init-org)

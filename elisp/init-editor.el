@@ -23,3 +23,6 @@
 
 ;; sudo-edit
 (use-package sudo-edit)
+
+;; language editing configurations
+(load "lang/setup-cc-mode")

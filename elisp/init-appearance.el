@@ -10,13 +10,14 @@
   (setq nlinum-relative-redisplay-delay 0)
   :hook ((prog-mode text-mode) . nlinum-relative-mode))
 
+
 ;; set theme
 (use-package night-owl-theme
   :config
   (load-theme 'night-owl t))
 
 ;; font
-(add-to-list 'default-frame-alist '(font . "gohufont-11"))
+(set-face-attribute 'default t :font "gohufont-11")
 
 ;; column 80 ruler
 (use-package fill-column-indicator

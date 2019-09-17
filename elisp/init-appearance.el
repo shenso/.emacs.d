@@ -17,7 +17,7 @@
   (load-theme 'night-owl t))
 
 ;; font
-(set-face-attribute 'default t :font "gohufont-11")
+(set-face-attribute 'default nil :font "gohufont11")
 
 ;; column 80 ruler
 (use-package fill-column-indicator

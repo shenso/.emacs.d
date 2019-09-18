@@ -9,6 +9,10 @@
       kept-old-versions 2
       version-control t)
 
+;; encoding
+(setq-default buffer-file-coding-system 'utf-8-unix)
+(prefer-coding-system 'utf-8)
+
 ;; file tree
 (use-package neotree
   :config
@@ -27,3 +31,4 @@
 ;; language editing configurations
 (load "lang/setup-cc-mode")
 (load "lang/setup-lua-mode")
+

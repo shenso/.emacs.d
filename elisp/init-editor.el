@@ -28,7 +28,9 @@
 ;; sudo-edit
 (use-package sudo-edit)
 
+;; alarm bell
+(setq visible-bell 1)
+
 ;; language editing configurations
 (load "lang/setup-cc-mode")
 (load "lang/setup-lua-mode")
-

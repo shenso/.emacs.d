@@ -17,7 +17,9 @@
   (load-theme 'night-owl t))
 
 ;; font
-(set-face-attribute 'default nil :font "gohufont11")
+(if (string= system-type "windows-nt")
+    (set-face-attribute 'default nil :font "gohufont11")
+  (set-frame-font "-*-gohufont-*-*-*-*-11-*-*-*-*-*-*-*"))
 
 ;; column 80 ruler
 (use-package fill-column-indicator

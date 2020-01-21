@@ -1,7 +1,6 @@
 (require 'package)
 
-(when (string= system-type "windows-nt")
-  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
        (proto (if no-ssl "http" "https")))

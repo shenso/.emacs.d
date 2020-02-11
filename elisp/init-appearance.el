@@ -12,9 +12,16 @@
 
 
 ;; set theme
-(use-package night-owl-theme
+(use-package all-the-icons) ; on first install do M-x all-the-icons-install-fonts
+(use-package doom-themes
   :config
-  (load-theme 'night-owl t))
+  (setq doom-themes-enable-bold t
+	doom-themes-enable-italic t)
+  (load-theme 'doom-moonlight t)
+
+  (doom-themes-neotree-config)
+  ;; does some fontify stuff
+  (doom-themes-org-config))
 
 ;; font
 (if (string= system-type "windows-nt")

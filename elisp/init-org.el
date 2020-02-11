@@ -46,7 +46,7 @@
 	      ((x-family-fonts "Sans Serif") '(:font "Sans Serif"))
 	      (nil (warn "Cannot find org-mode font."))))
        (base-font-color (face-foreground 'default nil 'default))
-       (headline       `(:inherit default :weight bold :foreground ,base-font-color)))
+       (headline       `(:inherit default :weight bold ,base-font-color)))
   (custom-theme-set-faces
    'user
    `(org-level-8 ((t (,@headline ,@variable-tuple))))

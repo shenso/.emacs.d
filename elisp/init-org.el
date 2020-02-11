@@ -21,6 +21,9 @@
 	org-journal-enable-encyption t
 	org-journal-encrypt-journal t))
 
+;; fix code block indentation (sorta, "C-c '" is still better)
+(setq org-src-tab-acts-natively t)
+
 
 ;;
 ;; form

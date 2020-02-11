@@ -22,6 +22,10 @@
   (doom-themes-neotree-config)
   ;; does some fontify stuff
   (doom-themes-org-config))
+;; mode line
+(use-package doom-modeline
+  :ensure t
+  :hook (after-init . doom-modeline-mode))
 
 ;; font
 (if (string= system-type "windows-nt")

@@ -14,10 +14,13 @@
 (prefer-coding-system 'utf-8)
 
 ;; file tree
-(use-package neotree
-  :bind ("<f8>" . 'neotree-toggle)
-  :config
-  (setq neo-theme 'arrow))
+;; I haven't been able to resolve performance problems that neotree seems to
+;; have on windows, ergo this conditional for the time being.
+(unless (string= system-type "windows-nt")
+  (use-package neotree
+    :bind ("<f8>" . 'neotree-toggle)
+    :config
+    (setq neo-theme 'arrow)))
 
 ;; obey column 80 limit
 (setq-default fill-column 80)

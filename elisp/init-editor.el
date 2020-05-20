@@ -15,15 +15,36 @@
 
 ;; file tree
 (use-package neotree
+  :bind ("<f8>" . 'neotree-toggle)
   :config
-  (setq neo-theme 'arrow)
-  (global-set-key [f8] 'neotree-toggle))
+  (setq neo-theme 'arrow))
 
 ;; obey column 80 limit
 (setq-default fill-column 80)
 
 ;; magit
 (use-package magit)
+
+;; projectile
+(use-package projectile
+  :config
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (projectile-global-mode))
+
+;; dashboard
+(use-package dashboard
+  :config
+  (setq dashboard-banner-logo-title (concat "emacs@" (system-name))
+	dashboard-items '((bookmarks . 5)
+			  (projects . 5)
+			  (recents . 5)
+			  (agenda . 10))
+	dashboard-set-heading-icons t
+	dashboard-set-file-icons t)
+  ;; no image for windows for now
+  (unless (string= system-type "windows-nt")
+    (setq dashboard-startup-banner "~/images/anime/lain/lain5.png"))
+  (dashboard-setup-startup-hook))
 
 ;; sudo-edit
 (use-package sudo-edit)

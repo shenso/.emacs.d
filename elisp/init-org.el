@@ -6,7 +6,7 @@
 
 ;; org-agenda
 (setq org-agenda-files (list notes-path
-			     (concat notes-path "courses/2020-spring")))
+			     (concat notes-path "courses/")))
 (global-set-key (kbd "C-c a") 'org-agenda)
 
 ;; org-crypt

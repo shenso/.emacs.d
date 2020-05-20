@@ -29,7 +29,7 @@
 
 ;; font
 (if (string= system-type "windows-nt")
-    (set-face-attribute 'default nil :font "gohufont11")
+    (set-face-attribute 'default nil :font "gohufont11") ; must remove the dash on windows for some reason.
   (set-frame-font "-*-gohufont-*-*-*-*-11-*-*-*-*-*-*-*"))
 
 ;; column 80 ruler

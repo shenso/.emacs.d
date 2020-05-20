@@ -18,6 +18,7 @@
 ;; have on windows, ergo this conditional for the time being.
 (unless (string= system-type "windows-nt")
   (use-package neotree
+    :requires all-the-icons
     :bind ("<f8>" . 'neotree-toggle)
     :config
     (setq neo-theme 'arrow)))

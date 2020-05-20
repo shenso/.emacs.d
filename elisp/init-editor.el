@@ -11,7 +11,7 @@
 
 ;; encoding
 (setq-default buffer-file-coding-system 'utf-8-unix)
-(prefer-coding-system 'utf-8)
+(prefer-coding-system 'utf-8-unix)
 
 ;; file tree
 ;; I haven't been able to resolve performance problems that neotree seems to

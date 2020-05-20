@@ -1,7 +1,5 @@
-;;
-;; functionality
-;;
 (require 'org)
+;;; function
 (setq notes-path "~/documents/notes/")
 
 ;; org-agenda
@@ -25,16 +23,15 @@
 (setq org-src-tab-acts-natively t)
 
 
-;;
-;; form
-;;
+;;; form
 (setq org-hide-emphasis-markers t
       org-pretty-entities t
       org-startup-indented t)
 ;; dot character for list
 (font-lock-add-keywords 'org-mode
 			'(("^ *\\([-]\\) "
-			   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+			   (0 (prog1 () (compose-region (match-beginning 1)
+							(match-end 1) "•"))))))
 
 ;; Better header bullet points
 (use-package org-bullets
@@ -60,13 +57,15 @@
    `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.25))))
    `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.5))))
    `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.75))))
-   `(org-document-title ((t (,@headline ,@variable-tuple :height 2.0 :underline nil))))))
+   `(org-document-title
+     ((t (,@headline ,@variable-tuple :height 2.0 :underline nil))))))
 
 ;; text & monospace fonts
 (custom-theme-set-faces
  'user
  '(variable-pitch ((t (:family "Roboto" :height 110 :weight light))))
- '(fixed-pitch ((t (:family "gohufont" :slant normal :weight normal :height 1.0 :width normal))))
+ '(fixed-pitch
+   ((t (:family "gohufont" :slant normal :weight normal :height 1.0 :width normal))))
  '(org-block ((t (:inherit fixed-pitch))))
  '(org-code ((t (:inherit (shadow fixed-pitch))))))
 (add-hook 'org-mode-hook 'variable-pitch-mode)

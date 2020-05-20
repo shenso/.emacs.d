@@ -11,8 +11,9 @@
   :hook ((prog-mode text-mode) . nlinum-relative-mode))
 
 
-;; set theme
-(use-package all-the-icons) ; on first install do M-x all-the-icons-install-fonts
+;;; set theme
+;; on first install do M-x all-the-icons-install-fonts
+(use-package all-the-icons)
 (use-package doom-themes
   :config
   (setq doom-themes-enable-bold t
@@ -29,7 +30,8 @@
 
 ;; font
 (if (string= system-type "windows-nt")
-    (set-face-attribute 'default nil :font "gohufont11") ; must remove the dash on windows for some reason.
+    ;; must remove the dash on windows for some reason.
+    (set-face-attribute 'default nil :font "gohufont11")
   (set-frame-font "-*-gohufont-*-*-*-*-11-*-*-*-*-*-*-*"))
 
 ;; column 80 ruler

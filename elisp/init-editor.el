@@ -21,7 +21,9 @@
     :requires all-the-icons
     :bind ("<f8>" . 'neotree-toggle)
     :config
-    (setq neo-theme 'arrow)))
+    (setq neo-theme 'arrow)
+    (setq neo-window-fixed-size nil)
+    (setq neo-hidden-regexp-list '("\\.meta$"))))
 
 ;; obey column 80 limit
 (setq-default fill-column 80)
@@ -56,6 +58,12 @@
 
 ;; alarm bell
 (setq visible-bell 1)
+
+;; company-mode (auto-complete)
+(use-package company
+  :config
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 2))
 
 ;; language editing configurations
 (load "lang/setup-cc-mode")

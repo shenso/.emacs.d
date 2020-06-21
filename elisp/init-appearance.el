@@ -4,7 +4,9 @@
 (tool-bar-mode -1)
 
 ;; line numbers
-(use-package nlinum)
+(use-package nlinum
+  :config
+  (setq nlinum-format " %d"))
 (use-package nlinum-relative
   :config
   (setq nlinum-relative-redisplay-delay 0)

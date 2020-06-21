@@ -27,7 +27,8 @@
 (setq-default fill-column 80)
 
 ;; magit
-(use-package magit)
+(use-package magit
+  :bind ("C-x g" . 'magit-status))
 
 ;; projectile
 (use-package projectile

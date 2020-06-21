@@ -65,6 +65,9 @@
   (setq company-idle-delay 0)
   (setq company-minimum-prefix-length 2))
 
+;; flycheck (syntax checker)
+(use-package flycheck)
+
 ;; language editing configurations
 (load "lang/setup-cc-mode")
 (load "lang/setup-csharp-mode")

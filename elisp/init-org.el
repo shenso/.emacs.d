@@ -1,4 +1,10 @@
 (require 'org)
+
+;; load org file with elisp source snippets
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)))
+
 ;;; function
 (setq notes-path "~/documents/notes/")
 

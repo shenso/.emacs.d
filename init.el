@@ -5,6 +5,6 @@
 (add-to-list 'load-path "~/.emacs.d/elisp")
 ;;; initialize packaging before configuration
 (load "init-packaging")
+(load "init-org")
 (load "init-appearance")
 (load "init-editor")
-(load "init-org")

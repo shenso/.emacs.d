@@ -21,17 +21,21 @@
 (setq visible-bell 1)
 
 ;;; editor packages & additions
-(use-package general)
+(use-package general
+  :ensure t)
 ;; the mark of the beast...
 (use-package evil
   :after (general)
   :config
+  ;; run org-mode with emacs state
+  (evil-set-initial-state 'org-mode 'emacs)
   (org-babel-load-file "~/.emacs.d/elisp/config/evil.org")
   (evil-mode 1))
 
 (load "editor/backend")
 (load "editor/integrations")
 (load "editor/navigation")
+(load "editor/frontend")
 
 ;; scripts for language major modes
 (load "lang/setup-cc-mode")

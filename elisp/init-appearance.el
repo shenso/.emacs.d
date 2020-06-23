@@ -5,6 +5,7 @@
 
 ;; line numbers
 (use-package nlinum
+  :ensure t
   :config
   (setq nlinum-format " %d"))
 (use-package nlinum-relative
@@ -15,8 +16,10 @@
 
 ;;; set theme
 ;; on first install do M-x all-the-icons-install-fonts
-(use-package all-the-icons)
+(use-package all-the-icons
+  :ensure t)
 (use-package doom-themes
+  :ensure t
   :config
   (setq doom-themes-enable-bold t
 	doom-themes-enable-italic t)
@@ -38,13 +41,9 @@
 
 ;; column 80 ruler
 (use-package fill-column-indicator
+  :ensure t
   :config
   (setq fci-rule-width 1
 	fci-rule-color "gray"
 	fci-rule-column 80)
   (add-hook 'prog-mode-hook 'fci-mode))
-;; post-column 80 highlighting
-(require 'whitespace)
-(setq whitespace-line-column 80
-      whitespace-style '(face lines-tail))
-(add-hook 'prog-mode-hook 'whitespace-mode)

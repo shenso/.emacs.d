@@ -1,5 +1,6 @@
 ;; magit
 (use-package magit
+  :ensure t
   :requires general
   :after (evil general)
   :config
@@ -11,4 +12,5 @@
 
 ;; sudo-edit
 (use-package sudo-edit
-  :unless (string= system-type "windows-nt"))
+  :unless (string= system-type "windows-nt")
+  :ensure t)

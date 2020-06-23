@@ -25,7 +25,6 @@
 ;; make use-package install packages
 (require 'use-package)
 (require 'use-package-ensure)
-(setq use-package-always-ensure t)
 ;; auto-updating of packages
 (use-package auto-package-update
   :config

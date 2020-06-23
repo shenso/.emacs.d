@@ -3,6 +3,7 @@
 ;; have on windows, ergo this conditional for the time being.
 (use-package neotree
   :unless (string= system-type "windows-nt")
+  :ensure t
   :requires (all-the-icons general)
   :after (evil general)
   :config
@@ -16,6 +17,7 @@
 
 ;; projectile
 (use-package projectile
+  :ensure t
   :config
   (projectile-global-mode)
   :general
@@ -25,6 +27,7 @@
 
 ;; dashboard
 (use-package dashboard
+  :ensure t
   :config
   (setq dashboard-banner-logo-title (concat "emacs@" (system-name))
 	dashboard-items '((bookmarks . 5)

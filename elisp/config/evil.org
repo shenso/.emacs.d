@@ -85,4 +85,3 @@
    "?"   'describe-mode
    "RET" 'magit-visit-thing))
 #+END_SRC
-

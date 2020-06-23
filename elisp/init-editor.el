@@ -13,30 +13,52 @@
 (setq-default buffer-file-coding-system 'utf-8-unix)
 (prefer-coding-system 'utf-8-unix)
 
+(use-package general)
+;; the mark of the beast...
+(use-package evil
+  :after general
+  :config
+  (load "config/evil")
+  (evil-mode 1))
+
 ;; file tree
 ;; I haven't been able to resolve performance problems that neotree seems to
 ;; have on windows, ergo this conditional for the time being.
-(unless (string= system-type "windows-nt")
-  (use-package neotree
-    :requires all-the-icons
-    :bind ("<f8>" . 'neotree-toggle)
-    :config
-    (setq neo-theme 'arrow)
-    (setq neo-window-fixed-size nil)
-    (setq neo-hidden-regexp-list '("\\.meta$"))))
+(use-package neotree
+  :unless (string= system-type "windows-nt")
+  :requires (all-the-icons general)
+  :after (evil general)
+  :config
+  (setq neo-theme 'arrow)
+  (setq neo-window-fixed-size nil)
+  (setq neo-hidden-regexp-list '("\\.meta$"))
+  (when (featurep 'evil)
+    (setup-neotree-evil-bindings))
+  :general
+  ("<f8>" 'neotree-toggle))
 
 ;; obey column 80 limit
 (setq-default fill-column 80)
 
 ;; magit
 (use-package magit
-  :bind ("C-x g" . 'magit-status))
+  :requires general
+  :after (evil general)
+  :config
+  (when (featurep 'evil)
+    (setup-magit-evil-bindings))
+  :general
+  (:states '(normal)
+   :prefix "SPC" "gg" 'magit-status))
 
 ;; projectile
 (use-package projectile
   :config
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (projectile-global-mode))
+  (projectile-global-mode)
+  :general
+  ("p" 'projectile-command-map
+   :prefix "SPC"
+   :states 'normal))
 
 ;; dashboard
 (use-package dashboard

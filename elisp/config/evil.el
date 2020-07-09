@@ -69,3 +69,18 @@
    "TAB" 'magit-section-toggle
    "?"   'describe-mode
    "RET" 'magit-visit-thing))
+
+(defun setup-org-evil-bindings ()
+  (evil-set-initial-state 'org-mode 'normal)
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-mode-keymap
+   "0"     'org-beginning-of-line
+   "$"     'org-end-of-line
+   "TAB"   'org-cycle
+   "dd"    'org-kill-line
+   "RET"   'org-return
+   "M-S-j" 'org-shiftmetadown
+   "M-S-k" 'org-shiftmetaup
+   "M-S-l" 'org-shiftmetaright
+   "M-S-h" 'org-shiftmetaleft))

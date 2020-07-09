@@ -25,12 +25,16 @@
   :ensure t)
 ;; the mark of the beast...
 (use-package evil
-  :after (general)
+  :requires general
+  :after general
   :config
-  ;; run org-mode with emacs state
-  (evil-set-initial-state 'org-mode 'emacs)
   (org-babel-load-file "~/.emacs.d/elisp/config/evil.org")
-  (evil-mode 1))
+  (setup-org-evil-bindings)
+  (evil-mode 1)
+  :general
+  ("?"    'describe-mode
+   "TAB" 'indent-for-tab-command
+   :states '(normal visual)))
 
 (load "editor/backend")
 (load "editor/integrations")

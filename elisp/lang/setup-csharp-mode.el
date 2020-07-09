@@ -1,4 +1,6 @@
-(use-package csharp-mode)
+(use-package csharp-mode
+  :config
+  (add-hook 'csharp-mode-hook 'setup-csharp-indentation))
 (use-package omnisharp
   :requires (csharp-mode company)
   :after (csharp-mode company)
@@ -10,3 +12,7 @@
   (add-hook 'csharp-mode-hook 'company-mode)
   ;; flycheck
   (add-hook 'csharp-mode-hook 'flycheck-mode))
+
+(defun setup-csharp-indentation ()
+  (setq indent-tabs-mode nil)
+  (setq tab-width 4))

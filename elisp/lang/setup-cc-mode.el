@@ -6,8 +6,8 @@
 				(other . "k&r")))
 
 ;; editor settings to apply only in c-mode/c++-mode
-(defun my-c-mode-hook ()
+(defun setup-cc-indentation ()
   (setq indent-tabs-mode nil)
   (setq tab-width 4))
-(add-hook 'c-mode-hook 'my-c-mode-hook)
-(add-hook 'c++-mode-hook 'my-c-mode-hook)
+(add-hook 'c-mode-hook 'setup-cc-indentation)
+(add-hook 'c++-mode-hook 'setup-cc-indentation)

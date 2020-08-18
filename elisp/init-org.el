@@ -6,13 +6,16 @@
  '((emacs-lisp . t)))
 
 ;;; function
-(setq notes-path "~/documents/notes/")
+(if (string= system-type "windows-nt")
+    (setq notes-path "/Users/shawn/Documents/notes")
+  (setq notes-path "~/documents/notes/"))
 
 ;; org-agenda
-(setq org-agenda-files (list notes-path
-			     (concat notes-path "courses/")
-			     (concat notes-path "study/")))
-(global-set-key (kbd "C-c a") 'org-agenda)
+(unless (string= system-type "windows-nt")
+  (setq org-agenda-files (list notes-path
+			       (concat notes-path "courses/")
+			       (concat notes-path "study/")))
+  (global-set-key (kbd "C-c a") 'org-agenda))
 
 ;; org-crypt
 (require 'org-crypt)

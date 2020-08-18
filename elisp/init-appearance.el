@@ -9,6 +9,7 @@
   :config
   (setq nlinum-format " %d"))
 (use-package nlinum-relative
+  :ensure t
   :config
   (setq nlinum-relative-redisplay-delay 0)
   :hook ((prog-mode text-mode) . nlinum-relative-mode))
@@ -36,7 +37,9 @@
 ;; font
 (if (string= system-type "windows-nt")
     ;; must remove the dash on windows for some reason.
-    (set-face-attribute 'default nil :font "gohufont11")
+    (progn
+      (set-face-attribute 'default nil :font "gohufont-11")
+      (set-face-attribute 'default nil :height 80))
   (set-frame-font "-*-gohufont-*-*-*-*-11-*-*-*-*-*-*-*"))
 
 ;; column 80 ruler

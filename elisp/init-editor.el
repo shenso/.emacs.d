@@ -25,6 +25,7 @@
   :ensure t)
 ;; the mark of the beast...
 (use-package evil
+  :ensure t
   :requires general
   :after general
   :config

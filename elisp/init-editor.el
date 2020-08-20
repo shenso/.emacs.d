@@ -28,10 +28,11 @@
   :ensure t
   :requires general
   :after general
-  :config
-  (org-babel-load-file "~/.emacs.d/elisp/config/evil.org")
+  :init
+  (load-file "~/.emacs.d/elisp/config/evil.el")
   (setup-org-evil-bindings)
-  (evil-mode 1)
+  :config
+  (evil-mode t)
   :general
   ("?"    'describe-mode
    "TAB" 'indent-for-tab-command

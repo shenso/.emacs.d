@@ -1,8 +1,5 @@
 ;; file tree
-;; I haven't been able to resolve performance problems that neotree seems to
-;; have on windows, ergo this conditional for the time being.
 (use-package neotree
-  :unless (string= system-type "windows-nt")
   :ensure t
   :requires (all-the-icons general)
   :after (evil general)
@@ -13,11 +10,16 @@
   (when (featurep 'evil)
     (setup-neotree-evil-bindings))
   :general
-  ("<f8>" 'neotree-toggle))
+  ("<f8>" 'neotree-toggle
+   :states '(normal insert visual emacs)
+   :keymap 'global-map))
 
 ;; projectile
 (use-package projectile
   :ensure t
+  :init
+  (setq projectile-project-search-path '("/Users/shawn/project
+s"))
   :config
   (projectile-global-mode)
   :general

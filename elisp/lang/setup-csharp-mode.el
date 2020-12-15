@@ -1,7 +1,9 @@
 (use-package csharp-mode
+  :ensure t
   :config
   (add-hook 'csharp-mode-hook 'setup-csharp-indentation))
 (use-package omnisharp
+  :ensure t
   :requires (csharp-mode company)
   :after (csharp-mode company)
   :config

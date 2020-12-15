@@ -17,6 +17,7 @@
 
 ;; autocompletion
 (use-package irony
+  :ensure t
   :init
   (setq w32-pipe-read-delay 0)
   :config
@@ -25,6 +26,7 @@
   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
 
 (use-package company-irony
+  :ensure t
   :requires (company irony)
   :config
   (add-to-list 'company-backends 'company-irony)
@@ -34,6 +36,7 @@
   (add-hook 'c-mode-hook 'company-mode))
 
 (use-package flycheck-irony
+  :ensure t
   :requires (flycheck irony)
   :config
   (add-hook 'c-mode-hook 'flycheck-mode)

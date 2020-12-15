@@ -23,6 +23,7 @@
 
 ;; org-journal
 (use-package org-journal
+  :ensure t
   :config
   (setq org-journal-dir (concat notes-path "journal")
 	org-journal-file-type 'weekly

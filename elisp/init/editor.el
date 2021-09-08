@@ -1,5 +1,6 @@
 ;;;; general emacs/editor configurations
 (require 'org)
+(require 'packaging)
 
 ;; move backup files to ~/.emacs.d/.backups
 (setq backup-directory-alist `(("." . "~/.emacs.d/.backups"))
@@ -47,3 +48,4 @@
 (load "lang/setup-cc-mode")
 (load "lang/setup-csharp-mode")
 (load "lang/setup-lua-mode")
+(load "lang/setup-php-mode")

@@ -2,13 +2,15 @@
 (use-package neotree
   :ensure t
   :requires (all-the-icons general)
-  :after (evil general)
+  :after (evil general projectile)
   :config
   (setq neo-theme 'arrow)
   (setq neo-window-fixed-size nil)
   (setq neo-hidden-regexp-list '("\\.meta$"))
   (when (featurep 'evil)
     (setup-neotree-evil-bindings))
+  (when (featurep 'projectile)
+    (setq projectile-switch-project-action 'neotree-projectile-action))
   :general
   ("<f8>" 'neotree-toggle
    :states '(normal insert visual emacs)
@@ -28,6 +30,12 @@
    :prefix "SPC"
    :states 'normal))
 
+(use-package helm-projectile
+  :ensure t
+  :after projectile
+  :config
+  (helm-projectile-on))
+
 ;; dashboard
 (use-package dashboard
   :ensure t
@@ -40,6 +48,7 @@
 	dashboard-set-heading-icons t
 	dashboard-set-file-icons t)
   ;; no image for windows for now
-  (unless (string= system-type "windows-nt")
-    (setq dashboard-startup-banner "~/images/anime/lain/lain5.png"))
+;;  (unless (or (string= system-type "windows-nt")
+;;	      (eq workspace 'work))
+;;    (setq dashboard-startup-banner "~/images/anime/lain/lain5.png"))
   (dashboard-setup-startup-hook))

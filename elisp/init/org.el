@@ -1,4 +1,6 @@
 (require 'org)
+(require 'packaging)
+(require 'workspaces)
 
 ;; load org file with elisp source snippets
 (org-babel-do-load-languages
@@ -11,11 +13,12 @@
   (setq notes-path "~/documents/notes/"))
 
 ;; org-agenda
-(unless (string= system-type "windows-nt")
+(when (and (eq workspace 'home)
+	   (not (string= system-type "windows-nt")))
   (setq org-agenda-files (list notes-path
 			       (concat notes-path "courses/")
-			       (concat notes-path "study/")))
-  (global-set-key (kbd "C-c a") 'org-agenda))
+			       (concat notes-path "study/"))))
+(global-set-key (kbd "C-c a") 'org-agenda)
 
 ;; org-crypt
 (require 'org-crypt)

@@ -1,3 +1,5 @@
+(require 'packaging)
+
 ;; disable toolbar/gui stuff
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
@@ -35,12 +37,7 @@
   :hook (after-init . doom-modeline-mode))
 
 ;; font
-(if (string= system-type "windows-nt")
-    ;; must remove the dash on windows for some reason.
-    (progn
-      (set-face-attribute 'default nil :font "gohufont-11")
-      (set-face-attribute 'default nil :height 80))
-  (set-frame-font "-*-gohufont-*-*-*-*-11-*-*-*-*-*-*-*"))
+(set-face-attribute 'default nil :font "Anonymous Pro" :height 130)
 
 ;; column 80 ruler
 (use-package fill-column-indicator

@@ -27,7 +27,10 @@
 (require 'use-package-ensure)
 ;; auto-updating of packages
 (use-package auto-package-update
+  :ensure t
   :config
   (setq auto-package-update-prompt-before-update t ;; choice to update
 	auto-package-update-delete-old-versions t)
   (auto-package-update-maybe))
+
+(provide 'packaging)

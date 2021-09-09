@@ -1,2 +1,3 @@
 (setq workspaces
-      '(("STPLTP28" . work)))
+      '(("STPLTP28" . work)
+	("navi" . home)))

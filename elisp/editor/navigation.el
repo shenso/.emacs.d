@@ -1,12 +1,12 @@
 ;; file tree
 (use-package neotree
   :ensure t
-  :requires (all-the-icons general)
-  :after (evil general projectile)
+  :after (all-the-icons evil general projectile)
+  :init
+  (setq neo-theme 'arrow
+	neo-window-fixed-size nil
+	neo-hidden-regexp-list '("\\.meta$")) 
   :config
-  (setq neo-theme 'arrow)
-  (setq neo-window-fixed-size nil)
-  (setq neo-hidden-regexp-list '("\\.meta$"))
   (when (featurep 'evil)
     (setup-neotree-evil-bindings))
   (when (featurep 'projectile)
@@ -19,27 +19,22 @@
 ;; projectile
 (use-package projectile
   :ensure t
-  :init
-  (if (string= system-type "windows-nt")
-      (setq projectile-project-search-path '("/Users/shawn/projects"))
-    (setq projectile-project-search-path '("~/projects")))
+  :init (load "config/projectile")
   :config
   (projectile-global-mode)
+  (use-package helm-projectile
+    :ensure t
+    :config
+    (helm-projectile-on))
   :general
   ("p" 'projectile-command-map
    :prefix "SPC"
    :states 'normal))
 
-(use-package helm-projectile
-  :ensure t
-  :after projectile
-  :config
-  (helm-projectile-on))
-
 ;; dashboard
 (use-package dashboard
   :ensure t
-  :config
+  :init
   (setq dashboard-banner-logo-title (concat "emacs@" (system-name))
 	dashboard-items '((bookmarks . 5)
 			  (projects . 5)
@@ -47,8 +42,6 @@
 			  (agenda . 10))
 	dashboard-set-heading-icons t
 	dashboard-set-file-icons t)
-  ;; no image for windows for now
-;;  (unless (or (string= system-type "windows-nt")
-;;	      (eq workspace 'work))
-;;    (setq dashboard-startup-banner "~/images/anime/lain/lain5.png"))
+  (load "config/dashboard")
+  :config
   (dashboard-setup-startup-hook))

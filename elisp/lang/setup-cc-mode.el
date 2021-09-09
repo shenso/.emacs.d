@@ -21,24 +21,18 @@
   :init
   (setq w32-pipe-read-delay 0)
   :config
-  (add-hook 'c++-mode-hook 'irony-mode)
-  (add-hook 'c-mode-hook 'irony-mode)
-  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
+  (use-package company-irony
+    :ensure t
+    :after company
+    :config
+    (add-to-list 'company-backends 'company-irony)
+    :hook (((c-mode c++-mode) . setup-cc-company)
+	   ((c-mode c++-mode) . company-mode)))
+  (use-package flycheck-irony
+    :ensure t
+    :after flycheck
+    :hook (((c-mode c++-mode) . flycheck-mode)
+	   (flycheck-mode . flycheck-irony-setup)))
+  :hook ((c-mode . irony-mode)
+	 (irony-mode . irony-cdb-autosetup-compile-options)))
 
-(use-package company-irony
-  :ensure t
-  :requires (company irony)
-  :config
-  (add-to-list 'company-backends 'company-irony)
-  (add-hook 'c++-mode-hook 'setup-cc-company)
-  (add-hook 'c-mode-hook 'setup-cc-company)
-  (add-hook 'c++-mode-hook 'company-mode)
-  (add-hook 'c-mode-hook 'company-mode))
-
-(use-package flycheck-irony
-  :ensure t
-  :requires (flycheck irony)
-  :config
-  (add-hook 'c-mode-hook 'flycheck-mode)
-  (add-hook 'c++-mode-hook 'flycheck-mode)
-  (add-hook 'flycheck-mode-hook 'flycheck-irony-setup))

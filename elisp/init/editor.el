@@ -27,15 +27,14 @@
 ;; the mark of the beast...
 (use-package evil
   :ensure t
-  :requires general
   :after general
   :init
-  (load-file "~/.emacs.d/elisp/config/evil.el")
+  (load "config/evil")
   (setup-org-evil-bindings)
   :config
   (evil-mode t)
   :general
-  ("?"    'describe-mode
+  ("?"   'describe-mode
    "TAB" 'indent-for-tab-command
    :states '(normal visual)))
 

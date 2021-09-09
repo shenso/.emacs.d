@@ -1,10 +1,8 @@
-(setq custom-file "~/.emacs.d/custom.el")
-(setq scripts-directory
-      (concat user-emacs-directory "elisp/"))
+(setq custom-file (concat user-emacs-directory "custom.el"))
+(setq scripts-directory (concat user-emacs-directory "elisp/"))
 
-;; load startup scripts
+;; add scripts to load path
 (add-to-list 'load-path scripts-directory)
-(add-to-list 'load-path (concat scripts-directory "editor"))
 
 ;;; initialize packaging before configuration
 (load "init/appearance")

@@ -1,8 +1,7 @@
 ;; magit
 (use-package magit
   :ensure t
-  :requires general
-  :after (evil general)
+  :after evil
   :config
   (when (featurep 'evil)
     (setup-magit-evil-bindings))

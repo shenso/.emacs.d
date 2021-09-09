@@ -8,36 +8,34 @@
 ;; line numbers
 (use-package nlinum
   :ensure t
-  :config
-  (setq nlinum-format " %d"))
-(use-package nlinum-relative
-  :ensure t
-  :config
+  :init
+  (setq nlinum-format " %d")
   (setq nlinum-relative-redisplay-delay 0)
-  :hook ((prog-mode text-mode) . nlinum-relative-mode))
+  :config
+  (use-package nlinum-relative
+    :ensure t
+    :hook ((prog-mode text-mode) . nlinum-relative-mode)))
 
-
-;;; set theme
 ;; on first install do M-x all-the-icons-install-fonts
 (use-package all-the-icons
   :ensure t)
+
+;; theme
 (use-package doom-themes
   :ensure t
-  :config
+  :init
+  (load "config/theme")
   (setq doom-themes-enable-bold t
 	doom-themes-enable-italic t)
-  (load-theme 'doom-moonlight t)
-
+  :config
+  (load-theme theme t)
+  ;; theme integrations
   (doom-themes-neotree-config)
-  ;; does some fontify stuff
-  (doom-themes-org-config))
-;; mode line
-(use-package doom-modeline
-  :ensure t
-  :hook (after-init . doom-modeline-mode))
+  (doom-themes-org-config)
+  (use-package doom-modeline
+    :ensure t
+    :hook (after-init . doom-modeline-mode)))
 
-;; font
-(set-face-attribute 'default nil :font "Anonymous Pro" :height 130)
 
 ;; column 80 ruler
 (use-package fill-column-indicator
@@ -46,4 +44,4 @@
   (setq fci-rule-width 1
 	fci-rule-color "gray"
 	fci-rule-column 80)
-  (add-hook 'prog-mode-hook 'fci-mode))
+  :hook (prog-mode . fci-mode))

@@ -19,7 +19,13 @@
 ;; projectile
 (use-package projectile
   :ensure t
-  :init (load "config/projectile")
+  :after neotree
+  :init
+  (setq projectile-switch-project-action
+	(lambda ()
+	  (cd (projectile-project-root))
+	  (neotree-projectile-action)))
+  (load "config/projectile")
   :config
   (projectile-global-mode)
   (use-package helm-projectile

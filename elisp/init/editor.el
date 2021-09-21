@@ -43,8 +43,15 @@
 (load "editor/navigation")
 (load "editor/frontend")
 
+(add-to-list 'load-path
+	     (concat scripts-directory "lang/"))
+
 ;; scripts for language major modes
-(load "lang/setup-cc-mode")
-(load "lang/setup-csharp-mode")
-(load "lang/setup-lua-mode")
-(load "lang/setup-php-mode")
+(load "setup-cc-mode")
+(load "setup-csharp-mode")
+(load "setup-lua-mode")
+(load "setup-php-mode")
+(load "setup-python-mode")
+(load "setup-typescript-mode")
+(load "setup-web-mode")
+(load "setup-misc-modes")

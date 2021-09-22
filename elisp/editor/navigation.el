@@ -1,6 +1,7 @@
 ;; file tree
 (use-package neotree
   :ensure t
+  :defer nil
   :after (all-the-icons evil general projectile)
   :init
   (setq neo-theme 'arrow

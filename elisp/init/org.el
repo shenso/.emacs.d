@@ -16,7 +16,6 @@
 (when (and (eq workspace 'home)
 	   (not (string= system-type "windows-nt")))
   (setq org-agenda-files (list notes-path
-			       (concat notes-path "courses/")
 			       (concat notes-path "study/"))))
 (global-set-key (kbd "C-c a") 'org-agenda)
 

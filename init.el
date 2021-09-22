@@ -1,3 +1,8 @@
+;; startup optimization
+(setq gc-cons-threshold most-positive-fixnum)
+(add-hook 'emacs-startup-hook
+	  (lambda () setq gc-cons-threshold (expt 2 23)))
+
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (setq scripts-directory (concat user-emacs-directory "elisp/"))
 

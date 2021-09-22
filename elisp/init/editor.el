@@ -38,19 +38,8 @@
    "TAB" 'indent-for-tab-command
    :states '(normal visual)))
 
-(load "editor/backend")
 (load "editor/integrations")
 (load "editor/navigation")
-
-(add-to-list 'load-path
-	     (concat scripts-directory "lang/"))
-
-;; scripts for language major modes
-(load "setup-cc-mode")
-(load "setup-csharp-mode")
-(load "setup-lua-mode")
-(load "setup-php-mode")
-(load "setup-python-mode")
-(load "setup-typescript-mode")
-(load "setup-web-mode")
-(load "setup-misc-modes")
+(load "editor/langs")
+(load "editor/autocomplete")
+(load "editor/linter")

@@ -41,7 +41,6 @@
 (load "editor/backend")
 (load "editor/integrations")
 (load "editor/navigation")
-(load "editor/frontend")
 
 (add-to-list 'load-path
 	     (concat scripts-directory "lang/"))

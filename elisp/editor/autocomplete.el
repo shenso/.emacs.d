@@ -32,4 +32,5 @@
     (php-mode . (lambda ()
 		  (company-mode t)
 		  (add-to-list 'company-backends
-			       'company-ac-php-backend)))))
+			       'company-ac-php-backend))))
+  :hook (emacs-lisp-mode . company-mode))

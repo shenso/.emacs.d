@@ -24,18 +24,25 @@
 ;;; editor packages & additions
 (use-package general
   :ensure t)
-;; the mark of the beast...
+
+(use-package undo-tree ;; this is stupid
+  :ensure t
+  :config
+  (global-undo-tree-mode))
 (use-package evil
   :ensure t
-  :after general
+  :after (general undo-tree)
   :init
   (load "config/evil")
+  (setq evil-undo-system 'undo-tree)
   (setup-org-evil-bindings)
   :config
   (evil-mode t)
   :general
   ("?"   'describe-mode
    "TAB" 'indent-for-tab-command
+   "u"   'undo-tree-undo
+   "C-r" 'undo-tree-redo
    :states '(normal visual)))
 
 (load "editor/integrations")

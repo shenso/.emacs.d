@@ -1,31 +1,39 @@
 ;; file tree
-(use-package neotree
+(use-package treemacs
   :ensure t
-  :defer nil
-  :after (all-the-icons evil general projectile)
-  :init
-  (setq neo-theme 'arrow
-	neo-window-fixed-size nil
-	neo-hidden-regexp-list '("\\.meta$")) 
   :config
-  (when (featurep 'evil)
-    (setup-neotree-evil-bindings))
-  (when (featurep 'projectile)
-    (setq projectile-switch-project-action 'neotree-projectile-action))
+  (use-package treemacs-evil
+    :ensure t
+    :after evil)
+  (use-package treemacs-projectile
+    :ensure t
+    :after projectile)
+  (use-package treemacs-magit
+    :ensure t
+    :after magit)
+  :config
   :general
-  ("<f8>" 'neotree-toggle
-   :states '(normal insert visual emacs)
-   :keymap 'global-map))
+  ("<f8>" 'treemacs
+   :keymaps 'global-map)
+  (:prefix "c"
+   :state 'treemacs
+   :keymaps 'treemacs-mode-map
+   "p a" 'treemacs-add-project-to-workspace
+   "p d" 'treemacs-remove-project-from-workspace
+   "p r" 'treemacs-rename-project
+   "p c c" 'treemacs-collapse-project
+   "p c o" 'treemacs-collapse-all-projects))
 
 ;; projectile
 (use-package projectile
   :ensure t
-  :after neotree
+  ;; :after neotree			
   :init
   (setq projectile-switch-project-action
 	(lambda ()
 	  (cd (projectile-project-root))
-	  (neotree-projectile-action)))
+	  ;; (neotree-projectile-action)
+	  ))
   (load "config/projectile")
   :config
   (projectile-global-mode)

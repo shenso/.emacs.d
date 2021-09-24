@@ -50,6 +50,10 @@
 		(setq indent-tabs-mode nil
 		      tab-width 4))))
 
+;; go
+(use-package go-mode
+  :ensure t)
+
 ;; php
 (use-package php-mode
   :ensure t)

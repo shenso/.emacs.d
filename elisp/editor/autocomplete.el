@@ -34,3 +34,14 @@
 		  (add-to-list 'company-backends
 			       'company-ac-php-backend))))
   :hook (emacs-lisp-mode . company-mode))
+
+;; language server protocol
+(use-package lsp-mode
+    :ensure t
+    :after (company flycheck go-mode)
+    :init
+    :hook
+    (go-mode . (lambda ()
+		 (lsp-deferred)
+		 (add-hook 'before-save-hook #'lsp-format-buffer t t)
+		 (add-hook 'before-save-hook #'lsp-organize-imports t t))))

@@ -60,3 +60,10 @@
   (load "config/dashboard")
   :config
   (dashboard-setup-startup-hook))
+
+(use-package nyan-mode
+  :ensure t
+  :init
+  (custom-set-variables
+   '(nyan-animate-nyancat t)
+   '(nyan-wavy-trail t)))

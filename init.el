@@ -14,7 +14,6 @@
       `((".*" ,temporary-file-directory t)))
 (setq disabled-command-function nil
       custom-file (concat user-emacs-directory "custom.el"))
-(message custom-file)
 (load custom-file 'noerror)
 
 
@@ -40,8 +39,35 @@
 
 
 
+;;; project management
+(use-package projectile
+  :ensure t
+  :init
+  (cl-case system-type
+    ((linux quote)
+     (setq projectile-key (kbd "C-c p")
+           projectile-project-search-path '("~/projects")))
+    ((darwin quote)
+     (setq projectile-key (kbd "s-p")
+           projectile-project-search-path '("~/Projects"))))
+  :config
+  (projectile-global-mode)
+  (projectile-discover-projects-in-search-path)
+  (define-key projectile-mode-map projectile-key 'projectile-command-map))
+
+
+
 ;;; appearance
+(tool-bar-mode -1)
 (setq column-number-mode t)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+;; resize keybinds
+(global-set-key (kbd "C-c j") 'shrink-window)
+(global-set-key (kbd "C-c k") 'enlarge-window)
+(global-set-key (kbd "C-c h") 'shrink-window-horizontally)
+(global-set-key (kbd "C-c l") 'enlarge-window-horizontally)
+
 (use-package nordic-night-theme
   :ensure t
   :config

@@ -27,6 +27,8 @@
                 (csharp-mode . "bsd")
                 (other . "java")))
 
+
+
 ;;; keyboard bindings
 (use-package evil
   :ensure t
@@ -50,6 +52,19 @@
 (global-set-key (kbd "C-c k") 'enlarge-window)
 (global-set-key (kbd "C-c h") 'shrink-window-horizontally)
 (global-set-key (kbd "C-c l") 'enlarge-window-horizontally)
+
+
+
+;;; integrations
+(use-package vterm
+  :ensure t
+  :after (evil)
+  :hook (vterm-mode . turn-off-evil-mode)
+  :config
+  (defun handle-vterm-switch (&optional dummy)
+    (when (equal major-mode 'vterm-mode)
+      (call-interactively 'turn-off-evil-mode)))
+  (add-hook 'window-selection-change-functions 'handle-vterm-switch))
 
 
 

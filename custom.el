@@ -4,7 +4,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(evil nordic-night-theme projectile))
+ '(package-selected-packages
+   '(csv-mode evil-collection key-chord nordic-night-theme projectile
+              typescript-mode vterm yaml-mode))
  '(safe-local-variable-directories '("/home/shenso/projects/thunar/"))
  '(safe-local-variable-values
    '((c-file-style quote gnu) (c-file-style 'gnu) (ident-tabs-mode)

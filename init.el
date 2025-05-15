@@ -86,6 +86,18 @@
 
 
 
+;;; major modes
+(use-package yaml-mode
+  :ensure t)
+(use-package csv-mode
+  :ensure t
+  :hook ((csv-mode tsv-mode) . csv-align-mode))
+(use-package typescript-mode
+  :if (equal system-type 'darwin)
+  :ensure t)
+
+
+
 ;;; appearance
 (tool-bar-mode -1)
 (setq column-number-mode t)

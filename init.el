@@ -73,7 +73,7 @@
   :ensure t
   :init
   (cl-case system-type
-    ((linux quote)
+    ((gnu/linux quote)
      (setq projectile-key (kbd "C-c p")
            projectile-project-search-path '("~/projects")))
     ((darwin quote)

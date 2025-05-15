@@ -27,15 +27,29 @@
                 (csharp-mode . "bsd")
                 (other . "java")))
 
-
-
 ;;; keyboard bindings
 (use-package evil
   :ensure t
   :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil)
   :config
   (evil-mode 1)
-  (evil-set-undo-system 'undo-redo))
+  (evil-set-undo-system 'undo-redo)
+  (global-set-key (kbd "C-c [") (lambda () (interactive) (turn-on-evil-mode) (evil-normal-state)))
+  (global-set-key (kbd "C-c ]") 'turn-off-evil-mode))
+
+(use-package evil-collection
+  :ensure t
+  :after (evil)
+  :config
+  (evil-collection-init '(dired)))
+
+;; resize keybinds
+(global-set-key (kbd "C-c j") 'shrink-window)
+(global-set-key (kbd "C-c k") 'enlarge-window)
+(global-set-key (kbd "C-c h") 'shrink-window-horizontally)
+(global-set-key (kbd "C-c l") 'enlarge-window-horizontally)
 
 
 
@@ -61,12 +75,6 @@
 (tool-bar-mode -1)
 (setq column-number-mode t)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-
-;; resize keybinds
-(global-set-key (kbd "C-c j") 'shrink-window)
-(global-set-key (kbd "C-c k") 'enlarge-window)
-(global-set-key (kbd "C-c h") 'shrink-window-horizontally)
-(global-set-key (kbd "C-c l") 'enlarge-window-horizontally)
 
 (use-package nordic-night-theme
   :ensure t

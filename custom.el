@@ -5,8 +5,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(csv-mode evil-collection key-chord nordic-night-theme projectile
-              typescript-mode vterm yaml-mode))
+   '(csv-mode evil-collection key-chord magit nordic-night-theme
+              projectile typescript-mode vterm yaml-mode))
  '(safe-local-variable-directories '("/home/shenso/projects/thunar/"))
  '(safe-local-variable-values
    '((c-file-style quote gnu) (c-file-style 'gnu) (ident-tabs-mode)

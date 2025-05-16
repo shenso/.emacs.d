@@ -43,9 +43,12 @@
 
 (use-package evil-collection
   :ensure t
-  :after (evil)
+  :after (evil magit)
   :config
-  (evil-collection-init '(dired)))
+  (let ((target-collections '(dired)))
+    (when (memq 'magit package-activated-list)
+      (push 'magit  target-collections))
+    (evil-collection-init target-collections)))
 
 ;; resize keybinds
 (global-set-key (kbd "C-c j") 'shrink-window)
@@ -58,13 +61,17 @@
 ;;; integrations
 (use-package vterm
   :ensure t
-  :after (evil)
+  :after evil
   :hook (vterm-mode . turn-off-evil-mode)
   :config
   (defun handle-vterm-switch (&optional dummy)
     (when (equal major-mode 'vterm-mode)
       (call-interactively 'turn-off-evil-mode)))
-  (add-hook 'window-selection-change-functions 'handle-vterm-switch))
+  (when (memq 'evil package-activated-list)
+    (add-hook 'window-selection-Change-Functions 'handle-vterm-switch)))
+
+(use-package magit
+  :ensure t)
 
 
 

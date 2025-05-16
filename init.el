@@ -114,3 +114,8 @@
   :ensure t
   :config
   (load-theme 'nordic-night t))
+
+(use-package nyan-mode
+  :ensure t
+  :config
+  (nyan-mode))

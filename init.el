@@ -68,7 +68,7 @@
     (when (equal major-mode 'vterm-mode)
       (call-interactively 'turn-off-evil-mode)))
   (when (memq 'evil package-activated-list)
-    (add-hook 'window-selection-Change-Functions 'handle-vterm-switch)))
+    (add-hook 'window-selection-change-functions 'handle-vterm-switch)))
 
 (use-package magit
   :ensure t)
@@ -84,8 +84,14 @@
      (setq projectile-key (kbd "C-c p")
            projectile-project-search-path '("~/projects")))
     ((darwin quote)
-     (setq projectile-key (kbd "s-p")
-           projectile-project-search-path '("~/Projects"))))
+     (let ((projectile-cache-dir (expand-file-name "~/.local/cache/emacs")))
+       (make-directory projectile-cache-dir :parents)
+       (setq projectile-key (kbd "s-p")
+             projectile-project-search-path '("~/Projects")
+             projectile-cache-file (expand-file-name "projectile.cache" projectile-cache-dir)
+             projectile-known-projects-file (expand-file-name "projectile-known-projects.eld" projectile-cache-dir))
+      )
+     ))
   :config
   (projectile-global-mode)
   (projectile-discover-projects-in-search-path)
@@ -100,7 +106,7 @@
   :ensure t
   :hook ((csv-mode tsv-mode) . csv-align-mode))
 (use-package typescript-mode
-  :if (equal system-type 'darwin)
+  :if (equal system-name "smith.local")
   :ensure t)
 
 

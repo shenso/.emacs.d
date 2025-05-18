@@ -144,7 +144,13 @@
   :config
   (load-theme 'nordic-night t))
 
+
 (use-package nyan-mode
   :ensure t
+  :init
+  (setq nyan-minimum-window-length 120
+        nyan-wavy-trail t)
   :config
-  (nyan-mode))
+  (when (or (daemonp) (display-graphic-p))
+    (nyan-mode 1)
+    (nyan-start-animation)))

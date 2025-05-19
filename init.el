@@ -142,8 +142,21 @@
 (use-package nordic-night-theme
   :ensure t
   :config
-  (load-theme 'nordic-night t))
+  (defun configure-theme (&optional frame)
+    (load-theme 'nordic-night t))
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook 'configure-theme)
+    (configure-theme)))
 
+(defun configure-fonts (&optional frame)
+  (defun font-available-p (font-name)
+    (find-font (font-spec :name font-name)))
+  (when
+      (font-available-p "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1")
+    (set-frame-font "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1")))
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook 'configure-fonts)
+  (configure-fonts))
 
 (use-package nyan-mode
   :ensure t

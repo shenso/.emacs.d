@@ -7,6 +7,12 @@
 
 
 
+;;; system lists
+(setq personal-systems '("plato")
+      work-systems '("smith.local"))
+
+
+
 ;;; redirect tempfile and customization spam
 (setq backup-directory-alist
       `((".*" . ,temporary-file-directory)))
@@ -45,10 +51,19 @@
   :ensure t
   :after (evil magit)
   :config
-  (let ((target-collections '(dired)))
+  (let ((target-collections '(dired calendar)))
     (when (memq 'magit package-activated-list)
       (push 'magit  target-collections))
     (evil-collection-init target-collections)))
+
+(use-package evil-org
+  :ensure t
+  :after (evil org)
+  :hook (org-mode . evil-org-mode)
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-set-key-theme '(navigation insert textobjects additional calendar))
+  (evil-org-agenda-set-keys))
 
 ;; resize keybinds
 (global-set-key (kbd "C-c j") 'shrink-window)
@@ -100,6 +115,8 @@
 
 
 ;;; major modes
+
+;; prog-mode derivatives
 (use-package yaml-mode
   :ensure t)
 (use-package csv-mode
@@ -132,12 +149,103 @@
     (setq sqlind-basic-offset 4))
   (add-hook 'sqlind-minor-mode-hook 'setup-sql-indent))
 
+;; text-mode derivatives
+(use-package org
+  :if (or (getenv "XDG_DOCUMENTS_DIR") (equal system-type 'darwin))
+  :hook ((org-mode . variable-pitch-mode)
+         (org-mode . visual-line-mode))
+  :config
+  ;; file encryption
+  (require 'epa-file)
+  (epa-file-enable)
+
+  ;; capture templates
+  (let* ((documents-dir-path (cond ((getenv "XDG_DOCUMENTS_DIR") (getenv "XDG_DOCUMENTS_DIR"))
+                                   ((equal system-type 'darwin) (expand-file-name "~/Documents"))))
+         (journal-path (expand-file-name "journal.gpg" documents-dir-path))
+         (meetings-path (expand-file-name "meetings.org" documents-dir-path)))
+    (setq org-capture-templates
+          `(("m" "Meeting"
+             entry (file+headline ,meetings-path "Meetings")
+             "* %U %?")))
+    (when (member system-name personal-systems)
+      (add-to-list 'org-capture-templates
+                   `("j" "Journal Entry"
+                     entry (file+datetree ,journal-path)
+                     "* %<%Y-%m-%d %A %H:%M:%S> - %?" :empty-lines 1))))
+
+  ;; keybinds
+  (global-set-key (kbd "C-c a") #'org-agenda)
+  (global-set-key (kbd "C-c c") #'org-capture)
+
+  ;; display settings
+  (require 'org-indent)
+  (setq org-startup-indented t
+        org-pretty-entities t
+        org-adapt-indentation t
+        org-hide-leading-stars t
+        org-hide-emphasis-markers t)
+
+  (defun setup-faces (&optional frame)
+    (defun family-available-p (family-name)
+      (member family-name (font-family-list)))
+
+    (when (display-graphic-p)
+      (let ((selected-family (cond
+                              ((family-available-p "DejaVu Sans") "DejaVu Sans"))))
+        (set-face-attribute 'variable-pitch nil :family "DejaVu Sans" :height 1.18)
+        (set-face-attribute 'org-document-title nil :font "DejaVu Sans" :weight 'bold :height 1.8)
+        ;; Resize Org headings
+        (dolist (face '((org-level-1 . 1.35)
+                        (org-level-2 . 1.3)
+                        (org-level-3 . 1.2)
+                        (org-level-4 . 1.1)
+                        (org-level-5 . 1.1)
+                        (org-level-6 . 1.1)
+                        (org-level-7 . 1.1)
+                        (org-level-8 . 1.1)))
+          (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'bold :height (cdr face))))
+
+      ;; use default font for following faces:
+      (set-face-attribute 'org-block nil            :foreground 'unspecified :inherit
+                          'fixed-pitch              :height 0.85)
+      (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
+      (set-face-attribute 'org-indent nil           :inherit 'org-hide)
+      (set-face-attribute 'org-verbatim nil         :inherit '(shadow fixed-pitch) :height 0.85)
+      (set-face-attribute 'org-special-keyword nil  :inherit '(font-lock-comment-face
+                                                               fixed-pitch))
+      (set-face-attribute 'org-meta-line nil        :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-checkbox nil         :inherit 'fixed-pitch)))
+
+  (if (daemonp)
+      (add-hook 'server-after-make-frame-hook 'setup-fonts)
+    (setup-fonts)))
+
 
 
 ;;; appearance
 (tool-bar-mode -1)
+(scroll-bar-mode -1)
 (setq column-number-mode t)
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'hl-line-mode)
+
+(defun setup-fonts (&optional frame)
+    (defun font-available-p (font-name)
+      (find-font (font-spec :name font-name)))
+
+    (let* ((menlo "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1")
+           (dejavu-mono "DejaVu Sans Mono:pixelsize=13:foundry=PfEd:weight=regular:slant=normal:width=normal:spacing=100:scalable=true")
+           (selected-font (cond
+                           ((font-available-p menlo) menlo)
+                           ((font-available-p dejavu-mono) dejavu-mono))))
+      (when (display-graphic-p)
+        (set-face-font 'fixed-pitch selected-font))
+      (set-frame-font selected-font)))
+
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook 'setup-fonts)
+  (setup-fonts))
 
 (use-package nordic-night-theme
   :ensure t
@@ -147,16 +255,6 @@
   (if (daemonp)
       (add-hook 'server-after-make-frame-hook 'configure-theme)
     (configure-theme)))
-
-(defun configure-fonts (&optional frame)
-  (defun font-available-p (font-name)
-    (find-font (font-spec :name font-name)))
-  (when
-      (font-available-p "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1")
-    (set-frame-font "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1")))
-(if (daemonp)
-    (add-hook 'server-after-make-frame-hook 'configure-fonts)
-  (configure-fonts))
 
 (use-package nyan-mode
   :ensure t

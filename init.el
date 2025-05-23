@@ -85,8 +85,31 @@
   (when (memq 'evil package-activated-list)
     (add-hook 'window-selection-change-functions 'handle-vterm-switch)))
 
+(use-package exec-path-from-shell
+  :ensure t
+  :if (and (equal system-type 'darwin) (daemonp))
+  :config
+  (exec-path-from-shell-initialize)
+  (exec-path-from-shell-copy-env "SSH_AGENT_PID")
+  (exec-path-from-shell-copy-env "SSH_AUTH_SOCK"))
+
 (use-package magit
-  :ensure t)
+  :ensure t
+  :after exec-path-from-shell
+  :config
+  ;; display git status buffer in current window
+  (setq magit-display-buffer-function
+        (lambda (buffer)
+          (display-buffer
+           buffer (if (and (derived-mode-p 'magit-mode)
+                           (memq (with-current-buffer buffer major-mode)
+                                 '(magit-process-mode
+                                   magit-revision-mode
+                                   magit-diff-mode
+                                   magit-stash-mode
+                                   magit-status-mode)))
+                      nil
+                    '(display-buffer-same-window))))))
 
 
 

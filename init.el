@@ -141,7 +141,9 @@
 
 ;; prog-mode derivatives
 (use-package yaml-mode
-  :ensure t)
+  :ensure t
+  :config
+  (add-hook 'yaml-mode-hook 'display-line-numbers-mode))
 (use-package csv-mode
   :ensure t
   :hook ((csv-mode tsv-mode) . csv-align-mode))

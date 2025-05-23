@@ -125,6 +125,13 @@
 (use-package typescript-mode
   :if (equal system-name "smith.local")
   :ensure t)
+(use-package go-mode
+  :if (equal system-name "plato")
+  :ensure t
+  :config
+  (add-hook 'go-mode-hook
+            (lambda ()
+              (add-hook 'before-save-hook 'gofmt-before-save))))
 
 ;; this sucks and has insane defaults, but it sucks less than default sql-mode
 (use-package sql-indent

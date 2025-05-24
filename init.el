@@ -5,6 +5,11 @@
 (unless package-archive-contents (package-refresh-contents))
 (unless (package-installed-p 'use-package) (package-install use-package))
 
+;; homebrew feature discovery
+(let ((elisp-dir (expand-file-name "elisp" user-emacs-directory)))
+  (when (file-exists-p elisp-dir)
+    (add-to-list 'load-path elisp-dir)))
+
 
 
 ;;; system lists

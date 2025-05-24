@@ -77,12 +77,28 @@
 (use-package vterm
   :ensure t
   :after evil
-  :hook (vterm-mode . turn-off-evil-mode)
   :config
-  (defun handle-vterm-switch (&optional dummy)
-    (when (equal major-mode 'vterm-mode)
-      (call-interactively 'turn-off-evil-mode)))
+  (defun handle-vterm-buffer-exit ()
+    (add-hook 'kill-buffer-hook
+              (lambda ()
+                (when (> (length (window-list)) 1)
+                  (delete-window (get-buffer-window (current-buffer)))))
+              nil t))
+
+  (add-hook 'vterm-mode-hook 'handle-vterm-buffer-exit)
+  (add-to-list 'display-buffer-alist
+               '("\\*vterm\\*"
+                 (display-buffer-reuse-mode-window
+                  display-buffer-at-bottom)
+                 (window-height . 12)))
+
+  (global-set-key (kbd "C-x vt") 'vterm)
+
   (when (memq 'evil package-activated-list)
+    (defun handle-vterm-switch (&optional dummy)
+      (when (equal major-mode 'vterm-mode)
+        (call-interactively 'turn-off-evil-mode)))
+    (add-hook 'vterm-mode-hook 'turn-off-evil-mode)
     (add-hook 'window-selection-change-functions 'handle-vterm-switch)))
 
 (use-package exec-path-from-shell

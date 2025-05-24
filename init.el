@@ -286,19 +286,22 @@
 
     (when (display-graphic-p)
       (let ((selected-family (cond
+                              ((family-available-p "Gill Sans") "Gill Sans")
                               ((family-available-p "DejaVu Sans") "DejaVu Sans"))))
-        (set-face-attribute 'variable-pitch nil :family "DejaVu Sans" :height 1.18)
-        (set-face-attribute 'org-document-title nil :font "DejaVu Sans" :weight 'bold :height 1.8)
-        ;; Resize Org headings
-        (dolist (face '((org-level-1 . 1.35)
-                        (org-level-2 . 1.3)
-                        (org-level-3 . 1.2)
-                        (org-level-4 . 1.1)
-                        (org-level-5 . 1.1)
-                        (org-level-6 . 1.1)
-                        (org-level-7 . 1.1)
-                        (org-level-8 . 1.1)))
-          (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'bold :height (cdr face))))
+        (message selected-family)
+        (unless (eq selected-family nil)
+          (set-face-attribute 'variable-pitch nil :family selected-family :height 1.18)
+          (set-face-attribute 'org-document-title nil :font selected-family :weight 'bold :height 1.8)
+          ;; Resize Org headings
+          (dolist (face '((org-level-1 . 1.35)
+                          (org-level-2 . 1.3)
+                          (org-level-3 . 1.2)
+                          (org-level-4 . 1.1)
+                          (org-level-5 . 1.1)
+                          (org-level-6 . 1.1)
+                          (org-level-7 . 1.1)
+                          (org-level-8 . 1.1)))
+            (set-face-attribute (car face) nil :font selected-family :weight 'bold :height (cdr face)))))
 
       ;; use default font for following faces:
       (set-face-attribute 'org-block nil            :foreground 'unspecified :inherit
@@ -312,8 +315,8 @@
       (set-face-attribute 'org-checkbox nil         :inherit 'fixed-pitch)))
 
   (if (daemonp)
-      (add-hook 'server-after-make-frame-hook 'setup-fonts)
-    (setup-fonts)))
+      (add-hook 'server-after-make-frame-hook 'setup-faces)
+    (setup-faces)))
 (require 'org)
 
 

@@ -14,7 +14,14 @@
 
 ;;; system lists
 (setq personal-systems '("plato")
-      work-systems '("smith.local"))
+      work-systems     '("smith.local"))
+
+(setq dart-systems       work-systems
+      golang-systems     personal-systems
+      sql-systems        work-systems
+      typescript-systems work-systems) ; devil in a new dress
+
+(setq lsp-systems work-systems)
 
 
 
@@ -132,6 +139,20 @@
                       nil
                     '(display-buffer-same-window))))))
 
+(use-package lsp-mode
+  :if (member system-name lsp-systems)
+  :ensure t
+  :init
+  (setq-default lsp-keep-workspace-alive nil
+                lsp-headerline-breadcrumb-segments '(file symbols)
+                lsp-signature-auto-activate '(:after-completion
+                                              :on-server-request))
+  :config
+  (use-package dap-mode
+    :ensure t)
+  (use-package lsp-ui
+    :ensure t))
+
 
 
 ;;; project management
@@ -161,27 +182,41 @@
 ;;; major modes
 
 ;; prog-mode derivatives
-(use-package yaml-mode
+(use-package dart-mode
+  :if (member system-name dart-systems)
   :ensure t
   :config
-  (add-hook 'yaml-mode-hook 'display-line-numbers-mode))
-(use-package csv-mode
-  :ensure t
-  :hook ((csv-mode tsv-mode) . csv-align-mode))
-(use-package typescript-mode
-  :if (equal system-name "smith.local")
-  :ensure t)
+  (use-package flutter
+    :ensure t
+    :init
+    (setq flutter-sdk-path (expand-file-name "~/.local/opt/flutter")))
+
+  (use-package lsp-dart
+    :if (member system-name lsp-systems)
+    :after lsp-mode
+    :ensure t
+    :hook (dart-mode . lsp)
+    :init
+    (setq lsp-dart-sdk-dir (expand-file-name "~/.local/opt/flutter/bin/cache/dart-sdk")
+          lsp-dart-flutter-sdk-dir (expand-file-name "~/.local/opt/flutter"))
+    :config
+    (setq gc-cons-threshold (* 100 1024 1024)
+          read-process-output-max (* 1024 1024))))
+
 (use-package go-mode
-  :if (equal system-name "plato")
+  :if (member system-name golang-systems)
   :ensure t
   :config
   (add-hook 'go-mode-hook
             (lambda ()
               (add-hook 'before-save-hook 'gofmt-before-save))))
+(use-package typescript-mode
+  :if (member system-name typescript-systems)
+  :ensure t)
 
 ;; this sucks and has insane defaults, but it sucks less than default sql-mode
 (use-package sql-indent
-  :if (equal system-name "smith.local")
+  :if (member system-name sql-systems)
   :ensure t
   :config
   (defun setup-sql-indent ()
@@ -203,6 +238,13 @@
   (add-hook 'sqlind-minor-mode-hook 'setup-sql-indent))
 
 ;; text-mode derivatives
+(use-package csv-mode
+  :ensure t
+  :hook ((csv-mode tsv-mode) . csv-align-mode))
+(use-package yaml-mode
+  :ensure t
+  :config
+  (add-hook 'yaml-mode-hook 'display-line-numbers-mode))
 (use-package org
   :if (or (getenv "XDG_DOCUMENTS_DIR") (equal system-type 'darwin))
   :hook ((org-mode . variable-pitch-mode)

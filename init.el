@@ -54,28 +54,28 @@
   (setq evil-want-integration t
         evil-want-keybinding nil)
   :config
-  (evil-mode 1)
   (evil-set-undo-system 'undo-redo)
   (global-set-key (kbd "C-c [") (lambda () (interactive) (turn-on-evil-mode) (evil-normal-state)))
-  (global-set-key (kbd "C-c ]") 'turn-off-evil-mode))
+  (global-set-key (kbd "C-c ]") 'turn-off-evil-mode)
 
-(use-package evil-collection
-  :ensure t
-  :after (evil magit)
-  :config
-  (let ((target-collections '(dired calendar)))
-    (when (memq 'magit package-activated-list)
-      (push 'magit  target-collections))
-    (evil-collection-init target-collections)))
+  (use-package evil-collection
+    :ensure t
+    :config
+    (require 'dired)
+    (evil-collection-init '(dired calendar))
+    (with-eval-after-load 'magit (evil-collection-magit-setup)))
 
-(use-package evil-org
-  :ensure t
-  :after (evil org)
-  :hook (org-mode . evil-org-mode)
-  :config
-  (require 'evil-org-agenda)
-  (evil-org-set-key-theme '(navigation insert textobjects additional calendar))
-  (evil-org-agenda-set-keys))
+  (use-package evil-org
+    :ensure t
+    :after org
+    :hook (org-mode . evil-org-mode)
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-set-key-theme '(navigation insert textobjects additional calendar))
+    (evil-org-agenda-set-keys))
+
+  (evil-mode 1))
+
 
 ;; resize keybinds
 (global-set-key (kbd "C-c j") 'shrink-window)
@@ -123,7 +123,6 @@
 
 (use-package magit
   :ensure t
-  :after exec-path-from-shell
   :config
   ;; display git status buffer in current window
   (setq magit-display-buffer-function
@@ -315,6 +314,7 @@
   (if (daemonp)
       (add-hook 'server-after-make-frame-hook 'setup-fonts)
     (setup-fonts)))
+(require 'org)
 
 
 

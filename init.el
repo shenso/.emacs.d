@@ -1,128 +1,217 @@
-;;; package setup
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
-(unless package-archive-contents (package-refresh-contents))
-(unless (package-installed-p 'use-package) (package-install use-package))
+;;; init.el by Shawn Henson
 
-;; homebrew feature discovery
-(let ((elisp-dir (expand-file-name "elisp" user-emacs-directory)))
+;; To the extent possible under law, the person who associated CC0 with
+;; init.el has waived all copyright and related or neighboring rights
+;; to init.el.
+
+;; You should have received a copy of the CC0 legalcode along with this
+;; work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+
+;;; homebrew feature/theme discovery
+(let ((elisp-dir (expand-file-name "elisp/" user-emacs-directory))
+      (theme-dir (expand-file-name "themes/" user-emacs-directory)))
   (when (file-exists-p elisp-dir)
-    (add-to-list 'load-path elisp-dir)))
+    (add-to-list 'load-path elisp-dir))
+  (when (file-exists-p theme-dir)
+    (add-to-list 'load-path theme-dir)
+    (setq custom-theme-directory theme-dir)))
+
+;; load common features
+(require 'macros)
+(require 'package-helper)
+
+(unless (memq epa-file-handler file-name-handler-alist)
+    (epa-file-enable))
+(defun shenso-ensure-secrets ()
+  (unless (boundp 'shenso-secrets-loaded)
+    (setq shenso-secrets-loaded nil))
+
+  (unless shenso-secrets-loaded
+    (with-demoted-errors "Error loading secret file: %s"
+      (load-file (expand-file-name "secrets.el.gpg" user-emacs-directory)))))
 
 
+;;; global config variables
+;; general-purpose directories
+(set-user-dir user-cache-dir     (coalesce (getenv "XDG_CACHE_HOME")
+                                           ;; TODO: find the appropriate dir for cache particularly.....
+                                           ;;       if i ever even bother to use emacs with windows
+                                           (when (eq system-type 'windows-nt) (getenv "APPDATA"))
+                                           "~/.local/cache")
+              user-data-dir      (coalesce (getenv "XDG_DATA_HOME")
+                                           (when (eq system-type 'windows-nt) (getenv "APPDATA"))
+                                           "~/.local/share")
+              user-state-dir     (coalesce (getenv "XDG_STATE_HOME")
+                                           (when (eq system-type 'windows-nt) (getenv "APPDATA"))
+                                           "~/.local/state")
+              user-documents-dir (coalesce (getenv "XDG_DOCUMENTS_DIR")
+                                           (when (memq system-type '(darwin windows-nt)) "~/Documents")
+                                           "~/documents")
+              user-projects-dir  (cond
+                                  ((memq system-type '(darwin windows-nt)) "~/Projects")
+                                  (t "~/projects")))
+(setq user-emacs-cache-dir (expand-file-name "emacs/"     user-cache-dir)
+      user-emacs-data-dir  (expand-file-name "emacs/"     user-data-dir)
+      user-emacs-docs-dir  (expand-file-name "doc/emacs/" user-data-dir)
+      user-emacs-state-dir (expand-file-name "emacs/"     user-state-dir))
 
-;;; system lists
+(make-directory user-emacs-cache-dir :parents)
+(make-directory user-emacs-data-dir  :parents)
+(make-directory user-emacs-state-dir :parents)
+
+;; specific-purpose directories
+(setq user-lsp-bridge-dir (expand-file-name "lsp-bridge" user-emacs-data-dir))
+(set-user-dir user-dart-sdk-dir "~/.local/opt/flutter/bin/cache/dart-sdk"
+              user-flutter-sdk-dir "~/.local/opt/flutter")
+
+;; system lists
 (setq personal-systems '("plato")
       work-systems     '("smith.local"))
 
-(setq dart-systems       work-systems
-      golang-systems     personal-systems
-      sql-systems        work-systems
-      typescript-systems work-systems) ; devil in a new dress
-
-(setq lsp-systems work-systems)
+(bootstrap-use-package user-emacs-data-dir)
 
 
+;;; core emacs configurations. any symbols referenced here should be originally defined by Emacs's
+;;; C source code, or an emacs lisp file which specifies "Emacs" as the package.
+(use-package emacs
+  :hook ((prog-mode . display-line-numbers-mode)
+         (prog-mode . hl-line-mode))
+  :config
+  ;; move temp files, autosave, etc out of config dir
+  (setq backup-directory-alist
+        `((".*" . ,temporary-file-directory)))
+  (setq auto-save-file-name-transforms
+        `((".*" ,temporary-file-directory t)))
+  (setq auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" temporary-file-directory))
+  ;; try to move eln files to cache dir
+  (let ((new-eln-cache-dir (expand-file-name "eln-cache/" user-emacs-cache-dir)))
+    (make-directory new-eln-cache-dir :parents)
+    (setcar native-comp-eln-load-path new-eln-cache-dir))
 
-;;; redirect tempfile and customization spam
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
-(setq disabled-command-function nil
-      custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file 'noerror)
+  ;; stop custom spam in init file
+  (setq disabled-command-function nil
+        custom-file (concat user-emacs-directory "custom.el"))
 
+  ;; appearance
+  (setq column-number-mode t)
 
+  ;; indentation settings
+  (setq-default tab-width 4
+                indent-tabs-mode nil)
 
-;;; editor and major mode preferences
-(setq-default tab-width 4
-              indent-tabs-mode nil)
-(setq-default c-default-style
-              '((c-mode . "k&r")
-                (c++-mode . "k&r")
-                (csharp-mode . "bsd")
-                (other . "java")))
+  ;; debian puts emacs docs in the non-free repo, which I am NOT addding, so thats
+  ;; why this is here.
+  (when (file-exists-p user-emacs-docs-dir)
+    (add-to-list 'Info-additional-directory-list user-emacs-docs-dir))
+
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (message "Emacs took %s seconds to start!" (emacs-init-time))))
+  (when (daemonp)
+    ;; ensure daemon clients still get to see the glorious emacs gnu
+    (add-hook 'server-after-make-frame-hook
+              (lambda ()
+                (when (and (string= (buffer-name) "*scratch*") (not (buffer-file-name)))
+                  (display-about-screen))))))
+
+(use-package bookmark
+  :defer t
+  :init
+  (setq bookmark-default-value (expand-file-name "bookmarks" user-emacs-state-dir)))
+
+(use-package eshell
+  :defer t
+  :init
+  (setq eshell-directory-name (expand-file-name "eshell" user-emacs-state-dir))
+  (make-directory eshell-directory-name :parents)
+  (setq eshell-history-file-name (expand-file-name "eshell/history" user-emacs-state-dir)))
+
+(use-package tramp
+  :defer t
+  :init
+  (setq tramp-persistency-file-name (expand-file-name "tramp" user-emacs-state-dir)))
+
+(use-package url
+  :defer t
+  :init
+  (setq url-configuration-directory (expand-file-name "url/" user-emacs-data-dir)))
 
 
 
 ;;; keyboard bindings
 (use-package evil
-  :ensure t
+  :straight t
+  :bind (("C-c [" . (lambda () (interactive) (turn-on-evil-mode) (evil-normal-state)))
+         ("C-c ]" . turn-off-evil-mode))
   :init
   (setq evil-want-integration t
         evil-want-keybinding nil)
+  :hook (after-init . evil-mode)
   :config
-  (evil-set-undo-system 'undo-redo)
-  (global-set-key (kbd "C-c [") (lambda () (interactive) (turn-on-evil-mode) (evil-normal-state)))
-  (global-set-key (kbd "C-c ]") 'turn-off-evil-mode)
+  (evil-set-undo-system 'undo-redo))
 
-  (use-package evil-collection
-    :ensure t
+(use-package evil-collection
+    :straight t
+    :after evil
     :config
-    (require 'dired)
-    (evil-collection-init '(dired calendar))
-    (with-eval-after-load 'magit (evil-collection-magit-setup)))
+    ;; builtin mode maps
+    (evil-collection-init
+     '(calendar custom debug diff-mode dired edebug eshell grep help info))
 
-  (use-package evil-org
-    :ensure t
-    :after org
-    :hook (org-mode . evil-org-mode)
+    ;; package mode maps
+    (with-eval-after-load 'magit (evil-collection-magit-setup))
+    (with-eval-after-load 'ivy (evil-collection-ivy-setup)))
+
+(use-package evil-org
+    :straight t
+    :after (evil org)
     :config
-    (require 'evil-org-agenda)
     (evil-org-set-key-theme '(navigation insert textobjects additional calendar))
-    (evil-org-agenda-set-keys))
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys)
+    ;; we need to add the hook after setting org-agenda keys, not in :hook
+    (add-hook 'org-mode #'evil-org-mode))
 
-  (evil-mode 1))
-
-
-;; resize keybinds
-(global-set-key (kbd "C-c j") 'shrink-window)
-(global-set-key (kbd "C-c k") 'enlarge-window)
-(global-set-key (kbd "C-c h") 'shrink-window-horizontally)
-(global-set-key (kbd "C-c l") 'enlarge-window-horizontally)
+(use-package evil-vterm ; homemade with love :)
+  :after (evil vterm)
+  :config
+  (evil-vterm-init))
 
 
 
 ;;; integrations
 (use-package vterm
-  :ensure t
-  :after evil
+  :straight t
+  :bind-keymap ("C-x v" . vterm-command-map)
+  :init
+  (define-key ctl-x-map "v" nil) ; we use magit anyways
   :config
-  (defun handle-vterm-buffer-exit ()
-    (add-hook 'kill-buffer-hook
-              (lambda ()
-                (when (> (length (window-list)) 1)
-                  (delete-window (get-buffer-window (current-buffer)))))
-              nil t))
+  (defvar-keymap vterm-command-map
+    "t" #'vterm)
+  (define-key ctl-x-map "v" 'vterm-command-map))
 
-  (add-hook 'vterm-mode-hook 'handle-vterm-buffer-exit)
-  (add-to-list 'display-buffer-alist
-               '("\\*vterm\\*"
-                 (display-buffer-reuse-mode-window
-                  display-buffer-at-bottom)
-                 (window-height . 12)))
-
-  (global-set-key (kbd "C-x vt") 'vterm)
-
-  (when (memq 'evil package-activated-list)
-    (defun handle-vterm-switch (&optional dummy)
-      (when (equal major-mode 'vterm-mode)
-        (call-interactively 'turn-off-evil-mode)))
-    (add-hook 'vterm-mode-hook 'turn-off-evil-mode)
-    (add-hook 'window-selection-change-functions 'handle-vterm-switch)))
+(use-package vterm-anchor ; homemade with love :)
+  :after vterm
+  :bind (:map vterm-command-map
+              ("a" . toggle-vterm-anchor))
+  :defer nil
+  :config
+  (anchor-vterm-to-bottom))
 
 (use-package exec-path-from-shell
-  :ensure t
-  :if (and (equal system-type 'darwin) (daemonp))
+  :straight t
   :config
   (exec-path-from-shell-initialize)
   (exec-path-from-shell-copy-env "SSH_AGENT_PID")
   (exec-path-from-shell-copy-env "SSH_AUTH_SOCK"))
 
 (use-package magit
-  :ensure t
+  :straight t
+  :defer t
+  :init
+  (setq transient-history-file (expand-file-name "transient/history.el" user-emacs-state-dir)
+        transient-levels-file (expand-file-name "transient/levels.el" user-emacs-state-dir)
+        transient-values-file (expand-file-name "transient/values.el" user-emacs-state-dir))
   :config
   ;; display git status buffer in current window
   (setq magit-display-buffer-function
@@ -138,85 +227,104 @@
                       nil
                     '(display-buffer-same-window))))))
 
-(use-package lsp-mode
-  :if (member system-name lsp-systems)
-  :ensure t
-  :init
-  (setq-default lsp-keep-workspace-alive nil
-                lsp-headerline-breadcrumb-segments '(file symbols)
-                lsp-signature-auto-activate '(:after-completion
-                                              :on-server-request))
+(use-package lsp-bridge
+  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
+            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+            :build (:not compile))
+  :after (markdown-mode yasnippet)
+  :if (file-exists-p user-lsp-bridge-dir)
+  :defer nil
+  :custom
+  (acm-enable-copilot nil)
   :config
-  (use-package dap-mode
-    :ensure t)
-  (use-package lsp-ui
-    :ensure t))
+  (setq lsp-bridge-python-command
+        (expand-file-name ".venv/bin/python" user-lsp-bridge-dir))
+  (require 'acm-backend-elisp)
+  (global-lsp-bridge-mode)
+
+  (defvar-keymap lsp-bridge-command-map
+    "d" #'lsp-bridge-find-def
+    "r" #'lsp-bridge-find-references
+    "i" #'lsp-bridge-show-documentation)
+  (keymap-set help-map (kbd "l") lsp-bridge-command-map) ; do we really need the lasso?
+  (with-eval-after-load 'evil
+    (evil-global-set-key 'normal (kbd "C-l") lsp-bridge-command-map))) ; zz does this anyways
+
+(use-package gptel
+  :straight t
+  :defer t
+  :config
+  (condition-case err
+      (shenso-ensure-secrets)
+    (error (display-warning :warning (format "Could not load secrets: %s" (error-message-string err)))))
+  (when (boundp 'shenso-secrets-claude-api-key)
+    (setq gptel-backend (gptel-make-anthropic "Claude" :stream t :key 'shenso-secrets-claude-api-key))))
 
 
 
-;;; project management
+;;; navigation/buffer completion
+(use-package ivy
+  :straight t
+  :config
+  (ivy-mode))
+
 (use-package projectile
-  :ensure t
-  :init
-  (cl-case system-type
-    ((gnu/linux quote)
-     (setq projectile-key (kbd "C-c p")
-           projectile-project-search-path '("~/projects")))
-    ((darwin quote)
-     (let ((projectile-cache-dir (expand-file-name "~/.local/cache/emacs")))
-       (make-directory projectile-cache-dir :parents)
-       (setq projectile-key (kbd "s-p")
-             projectile-project-search-path '("~/Projects")
-             projectile-cache-file (expand-file-name "projectile.cache" projectile-cache-dir)
-             projectile-known-projects-file (expand-file-name "projectile-known-projects.eld" projectile-cache-dir))
-      )
-     ))
+  :straight t
+  :bind-keymap (("C-c p" . projectile-command-map)
+                ("s-p"   . projectile-command-map))
   :config
+  (setq projectile-key
+        (cond ((eq system-type 'darwin) (kbd "s-p"))
+              (t                        (kbd "C-c p"))))
+  (setq projectile-project-search-path (list user-projects-dir)
+        projectile-cache-file          (expand-file-name "projectile.cache" user-emacs-state-dir)
+        projectile-known-projects-file (expand-file-name "projectile-known-projects.eld" user-emacs-state-dir))
   (projectile-global-mode)
   (projectile-discover-projects-in-search-path)
   (define-key projectile-mode-map projectile-key 'projectile-command-map))
 
+(use-package yasnippet
+  :straight t
+  :config
+  (yas-global-mode))
 
 
 ;;; major modes
 
 ;; prog-mode derivatives
-(use-package dart-mode
-  :if (member system-name dart-systems)
-  :ensure t
-  :config
-  (use-package flutter
-    :ensure t
-    :init
-    (setq flutter-sdk-path (expand-file-name "~/.local/opt/flutter")))
+(use-package cc-mode
+  :defer t
+  :init
+  (setq-default c-default-style
+                '((c-mode . "k&r")
+                  (c++-mode . "k&r")
+                  (csharp-mode . "bsd")
+                  (other . "java"))))
 
-  (use-package lsp-dart
-    :if (member system-name lsp-systems)
-    :after lsp-mode
-    :ensure t
-    :hook (dart-mode . lsp)
+(use-package dart-mode
+  :straight t
+  :mode ("\\.dart\\'"))
+
+(use-package flutter
+    :straight t
+    :if (file-exists-p user-flutter-sdk-dir)
+    :after dart-mode
     :init
-    (setq lsp-dart-sdk-dir (expand-file-name "~/.local/opt/flutter/bin/cache/dart-sdk")
-          lsp-dart-flutter-sdk-dir (expand-file-name "~/.local/opt/flutter"))
-    :config
-    (setq gc-cons-threshold (* 100 1024 1024)
-          read-process-output-max (* 1024 1024))))
+    (setq flutter-sdk-path user-flutter-sdk-dir))
 
 (use-package go-mode
-  :if (member system-name golang-systems)
-  :ensure t
-  :config
-  (add-hook 'go-mode-hook
-            (lambda ()
-              (add-hook 'before-save-hook 'gofmt-before-save))))
+  :straight t
+  :mode ("\\.go\\'")
+  :hook (go-mode . (lambda () (add-hook 'before-save-hook #'gofmt-before-save nil t))))
+
 (use-package typescript-mode
-  :if (member system-name typescript-systems)
-  :ensure t)
+  :straight t
+  :mode ("\\.ts\\'"))
 
 ;; this sucks and has insane defaults, but it sucks less than default sql-mode
 (use-package sql-indent
-  :if (member system-name sql-systems)
-  :ensure t
+  :straight t
+  :after sql-mode
   :config
   (defun setup-sql-indent ()
     (setq sqlind-indentation-offsets-alist
@@ -234,132 +342,80 @@
             (case-clause 0)
             ,@sqlind-default-indentation-offsets-alist))
     (setq sqlind-basic-offset 4))
-  (add-hook 'sqlind-minor-mode-hook 'setup-sql-indent))
+  (add-hook 'sqlind-minor-mode-hook #'setup-sql-indent))
 
 ;; text-mode derivatives
 (use-package csv-mode
-  :ensure t
+  :straight t
+  :mode ("\\.csv\\'" "\\.tsv\\'")
   :hook ((csv-mode tsv-mode) . csv-align-mode))
+
+(use-package csv-rainbow
+  :after csv-mode)
+
+(use-package markdown-mode
+  :straight t)
+
 (use-package yaml-mode
-  :ensure t
+  :straight t
+  :mode ("\\.yaml\\'" "\\.yml\\'")
   :config
-  (add-hook 'yaml-mode-hook 'display-line-numbers-mode))
+  (add-hook 'yaml-mode-hook #'display-line-numbers-mode))
+
 (use-package org
-  :if (or (getenv "XDG_DOCUMENTS_DIR") (equal system-type 'darwin))
   :hook ((org-mode . variable-pitch-mode)
          (org-mode . visual-line-mode))
+  :bind (("C-c a" . org-agenda)
+         ("C-c c" . org-capture))
   :config
-  ;; file encryption
-  (require 'epa-file)
-  (epa-file-enable)
-
   ;; capture templates
-  (let* ((documents-dir-path (cond ((getenv "XDG_DOCUMENTS_DIR") (getenv "XDG_DOCUMENTS_DIR"))
-                                   ((equal system-type 'darwin) (expand-file-name "~/Documents"))))
-         (journal-path (expand-file-name "journal.gpg" documents-dir-path))
-         (meetings-path (expand-file-name "meetings.org" documents-dir-path)))
-    (setq org-capture-templates
-          `(("m" "Meeting"
-             entry (file+headline ,meetings-path "Meetings")
-             "* %U %?")))
+  (setq org-capture-templates nil)
+  (when user-documents-dir
+    (when (member system-name work-systems)
+      (add-to-list 'org-capture-templates
+            `(("m" "Meeting"
+               entry (file+headline ,(expand-file-name "meetings.org" user-documents-dir) "Meetings")
+               "* %U %?"))))
     (when (member system-name personal-systems)
       (add-to-list 'org-capture-templates
                    `("j" "Journal Entry"
-                     entry (file+datetree ,journal-path)
-                     "* %<%Y-%m-%d %A %H:%M:%S> - %?" :empty-lines 1))))
-
-  ;; keybinds
-  (global-set-key (kbd "C-c a") #'org-agenda)
-  (global-set-key (kbd "C-c c") #'org-capture)
-
-  ;; display settings
-  (require 'org-indent)
-  (setq org-startup-indented t
-        org-pretty-entities t
-        org-adapt-indentation t
-        org-hide-leading-stars t
-        org-hide-emphasis-markers t)
-
-  (defun setup-faces (&optional frame)
-    (defun family-available-p (family-name)
-      (member family-name (font-family-list)))
-
-    (when (display-graphic-p)
-      (let ((selected-family (cond
-                              ((family-available-p "Gill Sans") "Gill Sans")
-                              ((family-available-p "DejaVu Sans") "DejaVu Sans"))))
-        (message selected-family)
-        (unless (eq selected-family nil)
-          (set-face-attribute 'variable-pitch nil :family selected-family :height 1.18)
-          (set-face-attribute 'org-document-title nil :font selected-family :weight 'bold :height 1.8)
-          ;; Resize Org headings
-          (dolist (face '((org-level-1 . 1.35)
-                          (org-level-2 . 1.3)
-                          (org-level-3 . 1.2)
-                          (org-level-4 . 1.1)
-                          (org-level-5 . 1.1)
-                          (org-level-6 . 1.1)
-                          (org-level-7 . 1.1)
-                          (org-level-8 . 1.1)))
-            (set-face-attribute (car face) nil :font selected-family :weight 'bold :height (cdr face)))))
-
-      ;; use default font for following faces:
-      (set-face-attribute 'org-block nil            :foreground 'unspecified :inherit
-                          'fixed-pitch              :height 0.85)
-      (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
-      (set-face-attribute 'org-indent nil           :inherit 'org-hide)
-      (set-face-attribute 'org-verbatim nil         :inherit '(shadow fixed-pitch) :height 0.85)
-      (set-face-attribute 'org-special-keyword nil  :inherit '(font-lock-comment-face
-                                                               fixed-pitch))
-      (set-face-attribute 'org-meta-line nil        :inherit '(font-lock-comment-face fixed-pitch))
-      (set-face-attribute 'org-checkbox nil         :inherit 'fixed-pitch)))
-
-  (if (daemonp)
-      (add-hook 'server-after-make-frame-hook 'setup-faces)
-    (setup-faces)))
-(require 'org)
+                     entry (file+olp+datetree ,(expand-file-name "journal.gpg" user-documents-dir))
+                     "* %<%Y-%m-%d %A %H:%M:%S> - %?" :empty-lines 1)))))
 
 
 
 ;;; appearance
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-(setq column-number-mode t)
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(add-hook 'prog-mode-hook 'hl-line-mode)
-
-(defun setup-fonts (&optional frame)
-    (defun font-available-p (font-name)
-      (find-font (font-spec :name font-name)))
-
-    (let* ((menlo "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1")
-           (dejavu-mono "DejaVu Sans Mono:pixelsize=13:foundry=PfEd:weight=regular:slant=normal:width=normal:spacing=100:scalable=true")
-           (selected-font (cond
-                           ((font-available-p menlo) menlo)
-                           ((font-available-p dejavu-mono) dejavu-mono))))
-      (when (display-graphic-p)
-        (set-face-font 'fixed-pitch selected-font))
-      (set-frame-font selected-font)))
-
-(if (daemonp)
-    (add-hook 'server-after-make-frame-hook 'setup-fonts)
-  (setup-fonts))
-
 (use-package nordic-night-theme
-  :ensure t
+  :straight t
   :config
-  (defun configure-theme (&optional frame)
-    (load-theme 'nordic-night t))
-  (if (daemonp)
-      (add-hook 'server-after-make-frame-hook 'configure-theme)
-    (configure-theme)))
+  (defun load-default-theme (&optional frame)
+    (load-theme 'nordic-night t)
+    (with-eval-after-load 'org
+      (set-face-attribute 'org-hide nil
+                          :foreground (face-attribute 'default :foreground)
+                          :background (face-attribute 'default :background))))
+  (call-on-client-frame-init load-default-theme))
+
+(use-package shenso-font-theme
+  :config
+  (defun load-font-theme (&optional frame)
+    (when (display-graphic-p)
+      (load-theme 'shenso-font t)))
+  (call-on-client-frame-init load-font-theme))
+
+(use-package org-pretty-theme ; homemade with love :)
+  :after org
+  :config
+  (defun load-org-theme (&optional frame)
+    (when (display-graphic-p)
+      (load-theme 'org-pretty t)))
+  (call-on-client-frame-init load-org-theme))
 
 (use-package nyan-mode
-  :ensure t
+  :straight t
   :init
   (setq nyan-minimum-window-length 120
         nyan-wavy-trail t)
   :config
-  (when (or (daemonp) (display-graphic-p))
-    (nyan-mode 1)
-    (nyan-start-animation)))
+  (nyan-mode 1)
+  (nyan-start-animation))

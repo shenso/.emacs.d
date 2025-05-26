@@ -1,0 +1,3 @@
+Given this repo is a configuration at its core, it is, for the most part, licensed under the CC0 license (detailed in the file LICENSE). I expect you to copy from this config as you find useful (I suppose you could use it entirely but that'd feel kinda weird - like wearing the same clothes).
+
+Some packages in the `elisp/` directory, however, are licensed under the GPL v3.0 license (detailed in file LICENSE-gpl-3.0), as they may be more software than configuration by lisp code. These source files will all have a header comment indicating their license. Any file for which I neglceted add a license header comment can be assumed to be under the CC0 license.

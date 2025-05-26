@@ -6,4 +6,4 @@ transient/
 tramp
 
 custom.el
-elisp/secret.el
+secrets.el.gpg

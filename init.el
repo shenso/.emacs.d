@@ -238,14 +238,16 @@
         (lambda (buffer)
           (display-buffer
            buffer (if (and (derived-mode-p 'magit-mode)
-                           (memq (with-current-buffer buffer major-mode)
-                                 '(magit-process-mode
-                                   magit-revision-mode
-                                   magit-diff-mode
-                                   magit-stash-mode
-                                   magit-status-mode)))
-                      nil
-                    '(display-buffer-same-window))))))
+                           (not (memq (with-current-buffer buffer major-mode)
+                                      '(magit-process-mode
+                                        magit-revision-mode
+                                        magit-diff-mode
+                                        magit-stash-mode
+                                        magit-status-mode))))
+                      '(display-buffer-same-window)
+                    (cond ((eq (with-current-buffer buffer major-mode) 'magit-status-mode)
+                           '(display-buffer-same-window))
+                          (t nil)))))))
 
 (use-package lsp-bridge
   :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"

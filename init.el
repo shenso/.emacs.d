@@ -109,7 +109,7 @@
   (setq column-number-mode t)
   (defun display-max-column-line ()
     (let ((max-col-no
-           (if (eq major-mode 'elisp-mode)
+           (if (eq major-mode 'emacs-lisp-mode)
                80
              100)))
       (set-fill-column max-col-no)

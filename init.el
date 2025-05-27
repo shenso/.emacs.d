@@ -91,7 +91,8 @@
   ;; stop custom spam in init file
   (setq disabled-command-function nil
         custom-file (concat user-emacs-directory "custom.el"))
-  (load-file custom-file)
+  (ignore-errors
+    (load-file custom-file))
 
   ;; appearance
   (setq column-number-mode t)

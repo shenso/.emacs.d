@@ -7,6 +7,8 @@
 ;; You should have received a copy of the CC0 legalcode along with this
 ;; work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
+(require 'cl-seq)
+
 (defmacro coalesce (&rest vals)
   (append '(cl-find-if #'identity) `(,(append '(list) vals))))
 

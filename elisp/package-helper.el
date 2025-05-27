@@ -30,7 +30,6 @@
               user-emacs-directory)))
         (bootstrap-version 7))
     (unless (file-exists-p bootstrap-file)
-      (load-file )
       (with-current-buffer
           (url-retrieve-synchronously
            "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"

@@ -22,10 +22,12 @@
 (defun anchor-vterm-to-bottom ()
   (interactive)
   (add-to-list 'display-buffer-alist vterm-anchor-display-buffer-action)
+  (add-hook 'vterm-mode-hook #'vterm-anchor-handle-buffer-exit)
   (setq vterm--anchored-to-bottom t))
 
 (defun unanchor-vterm-from-bottom ()
   (interactive)
+  (remove-hook 'vterm-mode-hook #'vterm-anchor-handle-buffer-exit)
   (setq display-buffer-alist (delete vterm-anchor-display-buffer-action display-buffer-alist))
   (setq vterm--anchored-to-bottom nil))
 
@@ -40,7 +42,7 @@
 
 (defun vterm-anchor-handle-buffer-exit ()
     (defun vterm-anchor-kill-buffer-callback ()
-      (when (and  vterm-at-bottom-enabled
+      (when (and vterm--anchored-to-bottom
                  (> (length (window-list)) 1))
         (delete-window (get-buffer-window (current-buffer)))))
     (add-hook 'kill-buffer-hook #'vterm-anchor-kill-buffer-callback nil t))

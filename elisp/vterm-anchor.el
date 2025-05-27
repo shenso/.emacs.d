@@ -43,7 +43,8 @@
 (defun vterm-anchor-handle-buffer-exit ()
     (defun vterm-anchor-kill-buffer-callback ()
       (when (and vterm--anchored-to-bottom
-                 (> (length (window-list)) 1))
+                 (> (length (window-list)) 1)
+                 (equal (buffer-name) "*vterm*"))
         (delete-window (get-buffer-window (current-buffer)))))
     (add-hook 'kill-buffer-hook #'vterm-anchor-kill-buffer-callback nil t))
 

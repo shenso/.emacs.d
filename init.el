@@ -195,8 +195,19 @@
   :init
   (define-key ctl-x-map "v" nil) ; we use magit anyways
   :config
+  (defun create-new-vterm (name)
+    (vterm (generate-new-buffer-name name)))
+  (defun create-new-unnamed-vterm ()
+    (interactive)
+    (create-new-vterm "*secondary vterm*"))
+  (defun create-new-named-vterm (name)
+    (interactive "sSession name: ")
+    (create-new-vterm (concat "*vterm: " name "*")))
+
   (defvar-keymap vterm-command-map
-    "t" #'vterm)
+    "t" #'vterm
+    "m" #'create-new-unnamed-vterm ; saves me from having to do C-u <n> C-x vt
+    "n" #'create-new-named-vterm)
   (define-key ctl-x-map "v" 'vterm-command-map))
 
 (use-package vterm-anchor ; homemade with love :)

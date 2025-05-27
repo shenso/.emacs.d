@@ -281,6 +281,7 @@
   :defer nil
   :custom
   (acm-enable-copilot nil)
+  (lsp-bridge-enable-hover-diagnostic t)
   :config
   (setq lsp-bridge-python-command
         (expand-file-name ".venv/bin/python" user-lsp-bridge-dir))
@@ -288,12 +289,18 @@
   (global-lsp-bridge-mode)
 
   (defvar-keymap lsp-bridge-command-map
-    "d" #'lsp-bridge-find-def
-    "r" #'lsp-bridge-find-references
-    "i" #'lsp-bridge-show-documentation)
+    "d"   #'lsp-bridge-find-def
+    "r"   #'lsp-bridge-find-references
+    "i"   #'lsp-bridge-show-documentation
+    "l"   #'lsp-bridge-popup-complete-menu
+    "C-l" #'lsp-bridge-popup-complete-menu)
   (keymap-set help-map (kbd "l") lsp-bridge-command-map) ; do we really need the lasso?
   (with-eval-after-load 'evil
-    (evil-global-set-key 'normal (kbd "C-l") lsp-bridge-command-map))) ; zz does this anyways
+    (evil-global-set-key 'normal (kbd "C-l") lsp-bridge-command-map) ; zz does this anyways
+    (evil-global-set-key 'insert (kbd "C-l") lsp-bridge-command-map))
+
+  (add-to-list 'display-buffer-alist '("\\*lsp-bridge-doc\\*"
+                                       (display-buffer-use-least-recent-window))))
 
 (use-package gptel
   :straight t

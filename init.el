@@ -91,6 +91,7 @@
   ;; stop custom spam in init file
   (setq disabled-command-function nil
         custom-file (concat user-emacs-directory "custom.el"))
+  (load-file custom-file)
 
   ;; appearance
   (setq column-number-mode t)
@@ -388,13 +389,17 @@
 (use-package nordic-night-theme
   :straight t
   :config
-  (defun load-default-theme (&optional frame)
+  (defun use-nordic-theme (&optional frame)
+    (interactive)
     (load-theme 'nordic-night t)
     (with-eval-after-load 'org
       (set-face-attribute 'org-hide nil
                           :foreground (face-attribute 'default :foreground)
                           :background (face-attribute 'default :background))))
-  (call-on-client-frame-init load-default-theme))
+  (defun use-default-theme ()
+    (interactive)
+    (disable-theme 'nordic-night))
+  (call-on-client-frame-init use-nordic-theme))
 
 (use-package shenso-font-theme
   :config

@@ -9,10 +9,25 @@
 
 (require 'macros)
 
-(defun shenso-font-name ()
+(defcustom shenso-font-use-small-fonts nil
+  "Uses smaller sized fonts when true."
+  :type '(boolean))
+
+;; https://media.tenor.com/9fXqFyfBPVwAAAAM/too-tiny-ken-jeong.gif
+(defun shenso-font--small-fonts ()
   (coalesce-font
    "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1"
    "DejaVu Sans Mono:pixelsize=13:foundry=PfEd:weight=regular:slant=normal:width=normal:spacing=100:scalable=true"))
+
+(defun shenso-font--large-fonts ()
+  (coalesce-font
+   "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1" ; TODO: tweak this
+   "DejaVu Sans Mono:pixelsize=15:foundry=PfEd:weight=regular:slant=normal:width=normal:spacing=100:scalable=true"))
+
+(defun shenso-font-name ()
+  (if shenso-font-use-small-fonts
+      (shenso-font--small-fonts)
+    (shenso-font--large-fonts)))
 
 (deftheme shenso-font
   "My basic font theme")

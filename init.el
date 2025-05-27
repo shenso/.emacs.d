@@ -100,6 +100,14 @@
 
   ;; appearance
   (setq column-number-mode t)
+  (defun display-max-column-line ()
+    (let ((max-col-no
+           (if (eq major-mode 'elisp-mode)
+               80
+             100)))
+      (set-fill-column max-col-no)
+      (display-fill-column-indicator-mode)))
+  (add-hook 'prog-mode-hook #'display-max-column-line)
 
   ;; indentation settings
   (setq-default tab-width 4

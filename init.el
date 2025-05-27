@@ -88,9 +88,11 @@
         `((".*" ,temporary-file-directory t)))
   (setq auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" temporary-file-directory))
   ;; try to move eln files to cache dir
-  (let ((new-eln-cache-dir (expand-file-name "eln-cache/" user-emacs-cache-dir)))
-    (make-directory new-eln-cache-dir :parents)
-    (setcar native-comp-eln-load-path new-eln-cache-dir))
+  (when (boundp 'native-comp-eln-load-path)
+    (let ((new-eln-cache-dir (expand-file-name "eln-cache/" user-emacs-cache-dir)))
+      (make-directory new-eln-cache-dir :parents)
+      (setcar native-comp-eln-load-path new-eln-cache-dir)))
+
 
   ;; stop custom spam in init file
   (setq disabled-command-function nil
@@ -134,8 +136,12 @@
   (setq bookmark-default-value (expand-file-name "bookmarks" user-emacs-state-dir)))
 
 (use-package dired
-  :custom (dired-listing-switches "-al --group-directories-first --indicator-style=slash")
-  :hook (dired-mode . dired-hide-details-mode))
+  :hook (dired-mode . dired-hide-details-mode)
+  :config
+  (when (or (eq system-type 'gnu/linux) (executable-find "gls"))
+    (when (executable-find "gls")
+      (setq insert-directory-program "gls"))
+    (setq dired-listing-switches "-al --group-directories-first --indicator-style=slash")))
 
 (use-package eshell
   :defer t

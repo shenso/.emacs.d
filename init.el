@@ -72,6 +72,9 @@
 (setq personal-systems '("plato")
       work-systems     '("smith.local"))
 
+;; reset display buffer action alist
+(setq display-buffer-alist nil)
+
 (bootstrap-use-package user-emacs-data-dir)
 
 
@@ -80,6 +83,8 @@
 (use-package emacs
   :hook ((prog-mode . display-line-numbers-mode)
          (prog-mode . hl-line-mode))
+  :custom
+  (help-window-keep-selected t)
   :config
   ;; move temp files, autosave, etc out of config dir
   (setq backup-directory-alist
@@ -331,6 +336,10 @@
   (projectile-global-mode)
   (projectile-discover-projects-in-search-path)
   (define-key projectile-mode-map projectile-key 'projectile-command-map))
+
+(use-package shenso-windowing
+  :config
+  (setq split-window-preferred-function #'split-window-insensibly))
 
 (use-package yasnippet
   :straight t

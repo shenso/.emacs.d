@@ -178,6 +178,9 @@
   :config
   (evil-vterm-init))
 
+(use-package free-keys
+  :straight '(free-keys :type git :host github :repo "Fuco1/free-keys"))
+
 
 
 ;;; integrations

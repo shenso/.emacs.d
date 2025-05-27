@@ -133,6 +133,10 @@
   :init
   (setq bookmark-default-value (expand-file-name "bookmarks" user-emacs-state-dir)))
 
+(use-package dired
+  :custom (dired-listing-switches "-al --group-directories-first --indicator-style=slash")
+  :hook (dired-mode . dired-hide-details-mode))
+
 (use-package eshell
   :defer t
   :init
@@ -299,6 +303,9 @@
 
 
 ;;; navigation/buffer completion
+(use-package dired-subtree
+  :straight t)
+
 (use-package ivy
   :straight t
   :config

@@ -25,10 +25,14 @@
 (defun shenso-ensure-secrets ()
   (unless (boundp 'shenso-secrets-loaded)
     (setq shenso-secrets-loaded nil))
-
   (unless shenso-secrets-loaded
-    (with-demoted-errors "Error loading secret file: %s"
-      (load-file (expand-file-name "secrets.el.gpg" user-emacs-directory)))))
+    (condition-case err
+        (load-file (expand-file-name "secrets.el.gpg" user-emacs-directory))
+      (error
+       (display-warning 'shenso-secrets
+                        (format "Could not load secrets: %s" (error-message-string err))
+                        :warning
+                        "*Warnings*")))))
 
 
 ;;; global config variables
@@ -259,11 +263,17 @@
   :straight t
   :defer t
   :config
-  (condition-case err
-      (shenso-ensure-secrets)
-    (error (display-warning :warning (format "Could not load secrets: %s" (error-message-string err)))))
-  (when (boundp 'shenso-secrets-claude-api-key)
-    (setq gptel-backend (gptel-make-anthropic "Claude" :stream t :key 'shenso-secrets-claude-api-key))))
+  (setq gptel-directives
+        `((default . ,(concat
+                       "You are a large language model living inside a GNU Emacs Buffer. Like "
+                       "all features in GNU Emacs you are designed to be helpful either with "
+                       "computer programming in general, programming in Emacs Lisp, or "
+                       "navigating, using, or understanding various aspects of GNU Emacs."))))
+  (shenso-ensure-secrets)
+  (when (fboundp 'shenso-secrets-claude-api-key)
+        (setq gptel-model 'claude-3-7-sonnet-20250219)
+        (setq gptel-backend
+              (gptel-make-anthropic "Claude" :stream t :key 'shenso-secrets-claude-api-key))))
 
 
 

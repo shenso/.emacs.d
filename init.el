@@ -95,6 +95,8 @@
   :custom
   (help-window-keep-selected t)
   (read-file-name-completion-ignore-case t)
+  (ring-bell-function #'ignore)
+  (visible-bell nil)
   :config
   ;; move temp files, autosave, etc out of config dir
   (setq backup-directory-alist

@@ -1,4 +1,4 @@
-;;; init.el by Shawn Henson
+;;; init.el by Shawn Henson -*- lexical-binding: t; -*-
 
 ;; To the extent possible under law, the person who associated CC0 with
 ;; init.el has waived all copyright and related or neighboring rights
@@ -572,3 +572,14 @@
       (nyan-mode -1)))
   (setup-nyan-mode)
   (add-hook 'theme-timer-change-hook #'setup-nyan-mode))
+
+(use-package diminish
+  :straight t
+  :config
+  (let ((target-modes '((projectile      . projectile-mode)
+                        (yasnippet       . yas-minor-mode)
+                        (ivy             . ivy-mode)
+                        (evil-collection . evil-collection-unimpaired-mode))))
+    (dolist (target-mode target-modes)
+      (with-eval-after-load (car target-mode)
+        (diminish (cdr target-mode))))))

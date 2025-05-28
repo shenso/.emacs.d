@@ -162,20 +162,14 @@
 (use-package dired
   :hook (dired-mode . dired-hide-details-mode)
   :custom
+  (dired-kill-when-opening-new-dired-buffer t)
   (dired-dwim-target t)
   :config
   (when (or (eq system-type 'gnu/linux) (executable-find "gls"))
     (when (executable-find "gls")
       (setq insert-directory-program "gls"))
     (setq dired-listing-switches
-          "-alv --group-directories-first --indicator-style=slash"))
-  (with-eval-after-load 'evil
-    (evil-define-key 'normal dired-mode-map
-      "f" #'find-name-dired
-      "p" #'find-lisp-find-dired
-      "P" #'find-lisp-find-dired-other-window
-      "n" #'find-lisp-find-dired-filter
-      "F" #'find-grep-dired)))
+          "-alv --group-directories-first --indicator-style=slash")))
 
 (use-package eshell
   :defer t
@@ -233,9 +227,22 @@
        info
        wdired))
 
+    ;; override dired change
+    (evil-define-key 'normal dired-mode-map "q" (lambda ()
+                                                  (interactive)
+                                                  (quit-window t)))
+
     ;; package mode maps
     (with-eval-after-load 'magit (evil-collection-magit-setup))
     (with-eval-after-load 'ivy (evil-collection-ivy-setup)))
+
+(use-package evil-dired
+  :after evil
+  :config
+  (evil-dired-setup)
+  (unless (featurep 'evil-collection)
+    (with-eval-after-load 'evil-collection
+      (evil-dired-setup))))
 
 (use-package evil-org
     :straight t

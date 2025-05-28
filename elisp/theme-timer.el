@@ -76,10 +76,11 @@ current theme was made."
                            (< current-hour theme-timer-day-time-hour))
                      (and (>= current-hour theme-timer-night-time-hour)
                           (< current-hour theme-timer-day-time-hour)))))
-    (message "current hour: %d; is night: %s" current-hour (if is-night "true" "false"))
     (if is-night
-        (theme-timer-use-theme theme-timer-night-time-theme theme-timer-day-time-theme)
-      (theme-timer-use-theme theme-timer-day-time-theme theme-timer-night-time-theme))
+        (theme-timer-use-theme theme-timer-night-time-theme
+                               theme-timer-day-time-theme)
+      (theme-timer-use-theme theme-timer-day-time-theme
+                             theme-timer-night-time-theme))
     is-night))
 
 (defun theme-timer-init ()
@@ -88,7 +89,9 @@ current theme was made."
     (cancel-timer theme-timer--timer))
 
   (let* ((is-night (theme-timer-use-time-appropriate-theme))
-         (next-hour (if is-night theme-timer-day-time-hour theme-timer-night-time-hour))
+         (next-hour (if is-night
+                        theme-timer-day-time-hour
+                      theme-timer-night-time-hour))
          (decoded-current-time (decode-time (current-time)))
          (current-hour (decoded-time-hour decoded-current-time))
          (current-minutes-and-seconds ; in seconds

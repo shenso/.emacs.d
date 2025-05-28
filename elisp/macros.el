@@ -19,7 +19,8 @@
     (if (>= (length raw-list) 2)
         (let ((s-key (car raw-list))
               (s-val (car (cdr raw-list))))
-          (append `(,s-key (when ,s-val (file-name-as-directory (expand-file-name ,s-val))))
+          (append `(,s-key (when ,s-val
+                             (file-name-as-directory (expand-file-name ,s-val))))
                   (dir-arg-list (cddr raw-list))))
       nil))
   (append '(setq)

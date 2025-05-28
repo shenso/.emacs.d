@@ -20,21 +20,44 @@
 
 (custom-theme-set-faces
  'org-pretty
- `(variable-pitch     ((nil (:family ,(org-pretty-font-family) :height 1.18             ))))
- `(org-document-title ((nil (:font   ,(org-pretty-font-family) :height 1.8  :weight bold))))
- `(org-level-1        ((nil (:font   ,(org-pretty-font-family) :height 1.3  :weight bold))))
- `(org-level-2        ((nil (:font   ,(org-pretty-font-family) :height 1.2  :weight bold))))
- `(org-level-3        ((nil (:font   ,(org-pretty-font-family) :height 1.1  :weight bold))))
- `(org-level-4        ((nil (:font   ,(org-pretty-font-family) :height 1.1  :weight bold))))
- `(org-level-5        ((nil (:font   ,(org-pretty-font-family) :height 1.1  :weight bold))))
- `(org-level-6        ((nil (:font   ,(org-pretty-font-family) :height 1.1  :weight bold))))
- `(org-level-7        ((nil (:font   ,(org-pretty-font-family) :height 1.1  :weight bold))))
- `(org-level-8        ((nil (:font   ,(org-pretty-font-family) :height 1.1  :weight bold))))
+ `(variable-pitch     ((nil (:family ,(org-pretty-font-family)
+                                     :height 1.18))))
+ `(org-document-title ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.8
+                                     :weight bold))))
+ `(org-level-1        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.3
+                                     :weight bold))))
+ `(org-level-2        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.2
+                                     :weight bold))))
+ `(org-level-3        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.1
+                                     :weight bold))))
+ `(org-level-4        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.1
+                                     :weight bold))))
+ `(org-level-5        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.1
+                                     :weight bold))))
+ `(org-level-6        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.1
+                                     :weight bold))))
+ `(org-level-7        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.1
+                                     :weight bold))))
+ `(org-level-8        ((nil (:font   ,(org-pretty-font-family)
+                                     :height 1.1
+                                     :weight bold))))
 
- '(org-block            ((nil (:inherit fixed-pitch             :height 0.85 :foreground unspecified))))
- '(org-code             ((nil (:inherit (shadow fixed-pitch)    :height 0.85                        ))))
- '(org-indent           ((nil (:inherit org-hide                                                    ))))
- '(org-verbatim         ((nil (:inherit (shadow fixed-pitch)    :height 0.85                        ))))
+ '(org-block            ((nil (:inherit fixed-pitch
+                                        :height 0.85
+                                        :foreground unspecified))))
+ '(org-code             ((nil (:inherit (shadow fixed-pitch)
+                                        :height 0.85))))
+ '(org-indent           ((nil (:inherit org-hide))))
+ '(org-verbatim         ((nil (:inherit (shadow fixed-pitch)
+                                        :height 0.85))))
  '(org-special-keyword  ((nil (:inherit (font-lock-comment-face
                                          fixed-pitch)))))
  '(org-meta-line        ((nil (:inherit (font-lock-comment-face

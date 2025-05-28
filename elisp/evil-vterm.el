@@ -17,6 +17,7 @@
 (defun evil-vterm-init ()
   (add-hook 'vterm-mode-hook #'turn-off-evil-mode)
   (add-hook 'buffer-list-update-hook #'evil-vterm-handle-window-change-selection)
-  (add-hook 'window-selection-change-functions #'evil-vterm-handle-window-change-selection))
+  (add-hook 'window-selection-change-functions
+            #'evil-vterm-handle-window-change-selection))
 
 (provide 'evil-vterm)

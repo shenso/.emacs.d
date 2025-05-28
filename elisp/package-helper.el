@@ -9,6 +9,11 @@
 
 (require 'dired)
 
+(defconst striaght-install-url
+  (concat "https://raw.githubusercontent.com/radian-software/straight.el/"
+          "develop/install.el"))
+(defconst straight-bootstrap-rel-path "straight/repos/straight.el/bootstrap.el")
+
 (defun bootstrap-use-package (&optional emacs-data-dir)
   (defvar bootstrap-version)
   (setq straight-check-for-modifications '(check-on-save find-when-checking))
@@ -21,18 +26,19 @@
         (make-directory versions-dir :parents))
       (unless (file-exists-p straight-dir)
         (make-directory straight-dir t))
-      (make-symbolic-link versions-dir (expand-file-name "versions/" straight-dir) t)))
+      (make-symbolic-link versions-dir
+                          (expand-file-name "versions/" straight-dir) t)))
 
   (let ((bootstrap-file
          (expand-file-name
-          "straight/repos/straight.el/bootstrap.el"
+          straight-bootstrap-rel-path
           (or (bound-and-true-p straight-base-dir)
               user-emacs-directory)))
         (bootstrap-version 7))
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
           (url-retrieve-synchronously
-           "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+
            'silent 'inhibit-cookies)
         (goto-char (point-max))
         (eval-print-last-sexp)))

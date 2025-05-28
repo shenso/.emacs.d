@@ -15,7 +15,8 @@
   '("\\*vterm\\*"
     (display-buffer-at-bottom)
     (window-height . 12))
-  "The action to perform when displaying vterm buffors when the anchor is enabled.")
+  (concat "The action to perform when displaying vterm buffors when the anchor"
+          " is enabled."))
 
 (setq vterm--anchored-to-bottom nil)
 
@@ -28,7 +29,8 @@
 (defun unanchor-vterm-from-bottom ()
   (interactive)
   (remove-hook 'vterm-mode-hook #'vterm-anchor-handle-buffer-exit)
-  (setq display-buffer-alist (delete vterm-anchor-display-buffer-action display-buffer-alist))
+  (setq display-buffer-alist (delete vterm-anchor-display-buffer-action
+                                     display-buffer-alist))
   (setq vterm--anchored-to-bottom nil))
 
 (defun toggle-vterm-anchor ()

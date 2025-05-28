@@ -32,7 +32,8 @@
   "Colors csv-rainbow will display on terminals.")
 
 (defcustom csv-rainbow-graphic-colors
-  '("orange red" "lawn green" "orange" "deep sky blue" "magenta" "sea green" "medium turquoise")
+  '("orange red" "lawn green" "orange" "deep sky blue" "magenta" "sea green"
+    "medium turquoise")
   "Colors csv-rainbow will display on GUI clients.")
 
 (defun csv-rainbow-color-codes ()
@@ -43,7 +44,9 @@
     (lambda (c)
       (mapcar (lambda (cs) (ash cs -8)) (color-values c)))
     (seq-filter (lambda (color) (member color (defined-colors)))
-                (if (display-graphic-p) csv-rainbow-graphic-colors csv-rainbow-ansi-colors)))))
+                (if (display-graphic-p)
+                    csv-rainbow-graphic-colors
+                  csv-rainbow-ansi-colors)))))
 
 (defmacro csv-rainbow--define-faces ()
   (let ((faces nil)
@@ -65,12 +68,16 @@
        ,@faces
        (setq csv-rainbow--faces ',face-symbols))))
 
-(defun csv-rainbow--forward-delimiter (separators field-quotes end &optional quote-level)
+(defun csv-rainbow--forward-delimiter (separators field-quotes end
+                                                  &optional quote-level)
   (unless quote-level
     (setq quote-level 0))
   (let ((found nil)
         (at-newline nil))
-    (while (and (not found) (not at-newline) (<= (point) end) (< (point) (point-max)))
+    (while (and (not found)
+                (not at-newline)
+                (<= (point) end)
+                (< (point) (point-max)))
       (cond ((memq (char-after) field-quotes)
              (setq quote-level (1+ quote-level))
              ;; escape quotes
@@ -102,7 +109,8 @@
           (quote-level 0)
           (continue t))
       (while (and (<= (point) pos) (< (point) (point-max)) continue)
-        (let* ((result (csv-rainbow--forward-delimiter separators field-quotes pos quote-level))
+        (let* ((result (csv-rainbow--forward-delimiter separators field-quotes
+                                                       pos quote-level))
                (delimiter-found (nth 0 result))
                (at-newline (nth 2 result)))
           (setq quote-level (nth 1 result))
@@ -114,13 +122,15 @@
 
 (defun csv-rainbow--col-matcher (separators field-quotes color-idx num-colors)
   (lambda (end)
-    (let* ((partial-parse-result (csv-rainbow--partial-parse separators field-quotes))
+    (let* ((partial-parse-result
+            (csv-rainbow--partial-parse separators field-quotes))
            (col-no (car partial-parse-result))
            (quote-level (nth 1 partial-parse-result))
            (match-found nil))
       (while (and (<= (point) end) (< (point) (point-max)) (not match-found))
         (let* ((prev-pos (point))
-               (move-result (csv-rainbow--forward-delimiter separators field-quotes end))
+               (move-result
+                (csv-rainbow--forward-delimiter separators field-quotes end))
                (delimiter-found (nth 0 move-result))
                (at-newline (nth 2 move-result)))
           (when (= (% col-no num-colors) color-idx)
@@ -138,7 +148,9 @@
         (field-quotes (mapcar #'string-to-char csv-field-quotes))
         (keywords nil))
     (dotimes (i (length faces))
-      (push `(,(csv-rainbow--col-matcher separators field-quotes i (length faces)) . ',(nth i faces))
+      (push `(,(csv-rainbow--col-matcher separators field-quotes i
+                                         (length faces))
+              . ',(nth i faces))
             keywords))
     keywords))
 
@@ -147,8 +159,10 @@
   :lighter nil
   (unless (and (boundp 'csv-rainbow--faces) csv-rainbow--faces)
     (csv-rainbow--define-faces))
-  (unless (and (boundp 'csv-rainbow--font-lock-keywords) csv-rainbow--font-lock-keywords)
-    (setq csv-rainbow--font-lock-keywords (csv-rainbow--create-font-lock-keywords csv-rainbow--faces)))
+  (unless (and (boundp 'csv-rainbow--font-lock-keywords)
+               csv-rainbow--font-lock-keywords)
+    (setq csv-rainbow--font-lock-keywords
+          (csv-rainbow--create-font-lock-keywords csv-rainbow--faces)))
   (unless (boundp 'csv-rainbow--prev-font-lock-defaults)
     (setq csv-rainbow--prev-font-lock-defaults font-lock-defaults))
 

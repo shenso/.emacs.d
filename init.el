@@ -30,30 +30,38 @@
         (load-file (expand-file-name "secrets.el.gpg" user-emacs-directory))
       (error
        (display-warning 'shenso-secrets
-                        (format "Could not load secrets: %s" (error-message-string err))
+                        (format "Could not load secrets: %s"
+                                (error-message-string err))
                         :warning
                         "*Warnings*")))))
 
 
 ;;; global config variables
 ;; general-purpose directories
-(set-user-dir user-cache-dir     (coalesce (getenv "XDG_CACHE_HOME")
-                                           ;; TODO: find the appropriate dir for cache particularly.....
-                                           ;;       if i ever even bother to use emacs with windows
-                                           (when (eq system-type 'windows-nt) (getenv "APPDATA"))
-                                           "~/.local/cache")
-              user-data-dir      (coalesce (getenv "XDG_DATA_HOME")
-                                           (when (eq system-type 'windows-nt) (getenv "APPDATA"))
-                                           "~/.local/share")
-              user-state-dir     (coalesce (getenv "XDG_STATE_HOME")
-                                           (when (eq system-type 'windows-nt) (getenv "APPDATA"))
-                                           "~/.local/state")
-              user-documents-dir (coalesce (getenv "XDG_DOCUMENTS_DIR")
-                                           (when (memq system-type '(darwin windows-nt)) "~/Documents")
-                                           "~/documents")
-              user-projects-dir  (cond
-                                  ((memq system-type '(darwin windows-nt)) "~/Projects")
-                                  (t "~/projects")))
+(set-user-dir
+ user-cache-dir     (coalesce (getenv "XDG_CACHE_HOME")
+                              ;; TODO: find the appropriate dir for cache 
+                              ;;       particularly..... if i ever even bother
+                              ;;       to use emacs with windows
+                              (when (eq system-type 'windows-nt)
+                                (getenv "APPDATA"))
+                              "~/.local/cache")
+ user-data-dir      (coalesce (getenv "XDG_DATA_HOME")
+                              (when (eq system-type 'windows-nt)
+                                (getenv "APPDATA"))
+                              "~/.local/share")
+ user-state-dir     (coalesce (getenv "XDG_STATE_HOME")
+                              (when (eq system-type 'windows-nt)
+                                (getenv "APPDATA"))
+                              "~/.local/state")
+ user-documents-dir (coalesce (getenv "XDG_DOCUMENTS_DIR")
+                              (when (memq system-type '(darwin windows-nt))
+                                "~/Documents")
+                              "~/documents")
+ user-projects-dir  (cond
+                     ((memq system-type '(darwin windows-nt)) "~/Projects")
+                     (t "~/projects")))
+
 (setq user-emacs-cache-dir (expand-file-name "emacs/"     user-cache-dir)
       user-emacs-data-dir  (expand-file-name "emacs/"     user-data-dir)
       user-emacs-docs-dir  (expand-file-name "doc/emacs/" user-data-dir)
@@ -78,8 +86,9 @@
 (bootstrap-use-package user-emacs-data-dir)
 
 
-;;; core emacs configurations. any symbols referenced here should be originally defined by Emacs's
-;;; C source code, or an emacs lisp file which specifies "Emacs" as the package.
+;;; core emacs configurations. any symbols referenced here should be originally
+;;; defined by Emacs's C source code, or an emacs lisp file which specifies
+;;; "Emacs" as the package.
 (use-package emacs
   :hook ((prog-mode . display-line-numbers-mode)
          (prog-mode . hl-line-mode))
@@ -91,10 +100,12 @@
         `((".*" . ,temporary-file-directory)))
   (setq auto-save-file-name-transforms
         `((".*" ,temporary-file-directory t)))
-  (setq auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" temporary-file-directory))
+  (setq auto-save-list-file-prefix
+        (expand-file-name "auto-save-list/.saves-" temporary-file-directory))
   ;; try to move eln files to cache dir
   (when (boundp 'native-comp-eln-load-path)
-    (let ((new-eln-cache-dir (expand-file-name "eln-cache/" user-emacs-cache-dir)))
+    (let ((new-eln-cache-dir (expand-file-name "eln-cache/"
+                                               user-emacs-cache-dir)))
       (make-directory new-eln-cache-dir :parents)
       (setcar native-comp-eln-load-path new-eln-cache-dir)))
 
@@ -120,8 +131,8 @@
   (setq-default tab-width 4
                 indent-tabs-mode nil)
 
-  ;; debian puts emacs docs in the non-free repo, which I am NOT addding, so thats
-  ;; why this is here.
+  ;; debian puts emacs docs in the non-free repo, which I am NOT addding, so
+  ;; thats why this is here.
   (when (file-exists-p user-emacs-docs-dir)
     (add-to-list 'Info-additional-directory-list user-emacs-docs-dir))
 
@@ -132,13 +143,15 @@
     ;; ensure daemon clients still get to see the glorious emacs gnu
     (add-hook 'server-after-make-frame-hook
               (lambda ()
-                (when (and (string= (buffer-name) "*scratch*") (not (buffer-file-name)))
+                (when (and (string= (buffer-name) "*scratch*")
+                           (not (buffer-file-name)))
                   (display-about-screen))))))
 
 (use-package bookmark
   :defer t
   :init
-  (setq bookmark-default-value (expand-file-name "bookmarks" user-emacs-state-dir)))
+  (setq bookmark-default-value (expand-file-name "bookmarks"
+                                                 user-emacs-state-dir)))
 
 (use-package dired
   :hook (dired-mode . dired-hide-details-mode)
@@ -146,31 +159,38 @@
   (when (or (eq system-type 'gnu/linux) (executable-find "gls"))
     (when (executable-find "gls")
       (setq insert-directory-program "gls"))
-    (setq dired-listing-switches "-al --group-directories-first --indicator-style=slash")))
+    (setq dired-listing-switches
+          "-al --group-directories-first --indicator-style=slash")))
 
 (use-package eshell
   :defer t
   :init
   (setq eshell-directory-name (expand-file-name "eshell" user-emacs-state-dir))
   (make-directory eshell-directory-name :parents)
-  (setq eshell-history-file-name (expand-file-name "eshell/history" user-emacs-state-dir)))
+  (setq eshell-history-file-name (expand-file-name "eshell/history"
+                                                   user-emacs-state-dir)))
 
 (use-package tramp
   :defer t
   :init
-  (setq tramp-persistency-file-name (expand-file-name "tramp" user-emacs-state-dir)))
+  (setq tramp-persistency-file-name (expand-file-name "tramp"
+                                                      user-emacs-state-dir)))
 
 (use-package url
   :defer t
   :init
-  (setq url-configuration-directory (expand-file-name "url/" user-emacs-data-dir)))
+  (setq url-configuration-directory (expand-file-name "url/"
+                                                      user-emacs-data-dir)))
 
 
 
 ;;; keyboard bindings
 (use-package evil
   :straight t
-  :bind (("C-c [" . (lambda () (interactive) (turn-on-evil-mode) (evil-normal-state)))
+  :bind (("C-c [" . (lambda ()
+                      (interactive)
+                      (turn-on-evil-mode)
+                      (evil-normal-state)))
          ("C-c ]" . turn-off-evil-mode))
   :init
   (setq evil-want-integration t
@@ -252,9 +272,12 @@
   :straight t
   :defer t
   :init
-  (setq transient-history-file (expand-file-name "transient/history.el" user-emacs-state-dir)
-        transient-levels-file (expand-file-name "transient/levels.el" user-emacs-state-dir)
-        transient-values-file (expand-file-name "transient/values.el" user-emacs-state-dir))
+  (setq transient-history-file (expand-file-name "transient/history.el"
+                                                 user-emacs-state-dir)
+        transient-levels-file (expand-file-name "transient/levels.el"
+                                                user-emacs-state-dir)
+        transient-values-file (expand-file-name "transient/values.el"
+                                                user-emacs-state-dir))
   :config
   ;; display git status buffer in current window
   (setq magit-display-buffer-function
@@ -268,13 +291,15 @@
                                         magit-stash-mode
                                         magit-status-mode))))
                       '(display-buffer-same-window)
-                    (cond ((eq (with-current-buffer buffer major-mode) 'magit-status-mode)
+                    (cond ((eq (with-current-buffer buffer major-mode)
+                               'magit-status-mode)
                            '(display-buffer-same-window))
                           (t nil)))))))
 
 (use-package lsp-bridge
   :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
-            :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+            :files (:defaults "*.el" "*.py" "acm" "core" "langserver"
+                              "multiserver" "resources")
             :build (:not compile))
   :after (markdown-mode yasnippet)
   :if (file-exists-p user-lsp-bridge-dir)
@@ -294,13 +319,16 @@
     "i"   #'lsp-bridge-show-documentation
     "l"   #'lsp-bridge-popup-complete-menu
     "C-l" #'lsp-bridge-popup-complete-menu)
-  (keymap-set help-map (kbd "l") lsp-bridge-command-map) ; do we really need the lasso?
+  ;; do we really need the lasso?
+  (keymap-set help-map (kbd "l") lsp-bridge-command-map)
   (with-eval-after-load 'evil
-    (evil-global-set-key 'normal (kbd "C-l") lsp-bridge-command-map) ; zz does this anyways
+    ;; zz does this anyhow
+    (evil-global-set-key 'normal (kbd "C-l") lsp-bridge-command-map)
     (evil-global-set-key 'insert (kbd "C-l") lsp-bridge-command-map))
 
-  (add-to-list 'display-buffer-alist '("\\*lsp-bridge-doc\\*"
-                                       (display-buffer-use-least-recent-window))))
+  (add-to-list 'display-buffer-alist
+               '("\\*lsp-bridge-doc\\*"
+                 (display-buffer-use-least-recent-window))))
 
 (use-package gptel
   :straight t
@@ -308,15 +336,19 @@
   :config
   (setq gptel-directives
         `((default . ,(concat
-                       "You are a large language model living inside a GNU Emacs Buffer. Like "
-                       "all features in GNU Emacs you are designed to be helpful either with "
-                       "computer programming in general, programming in Emacs Lisp, or "
-                       "navigating, using, or understanding various aspects of GNU Emacs."))))
+                       "You are a large language model living inside a GNU Emacs"
+                       " Buffer. Like all features in GNU Emacs you are designed"
+                       " to be helpful either with computer programming in"
+                       " general, programming in Emacs Lisp, or navigating,"
+                       " using, or understanding various aspects of GNU Emacs."
+                       ))))
   (shenso-ensure-secrets)
   (when (fboundp 'shenso-secrets-claude-api-key)
         (setq gptel-model 'claude-3-7-sonnet-20250219)
         (setq gptel-backend
-              (gptel-make-anthropic "Claude" :stream t :key 'shenso-secrets-claude-api-key))))
+              (gptel-make-anthropic "Claude"
+                :stream t
+                :key 'shenso-secrets-claude-api-key))))
 
 
 
@@ -338,8 +370,12 @@
         (cond ((eq system-type 'darwin) (kbd "s-p"))
               (t                        (kbd "C-c p"))))
   (setq projectile-project-search-path (list user-projects-dir)
-        projectile-cache-file          (expand-file-name "projectile.cache" user-emacs-state-dir)
-        projectile-known-projects-file (expand-file-name "projectile-known-projects.eld" user-emacs-state-dir))
+        projectile-cache-file          (expand-file-name
+                                        "projectile.cache"
+                                        user-emacs-state-dir)
+        projectile-known-projects-file (expand-file-name
+                                        "projectile-known-projects.eld"
+                                        user-emacs-state-dir))
   (projectile-global-mode)
   (projectile-discover-projects-in-search-path)
   (define-key projectile-mode-map projectile-key 'projectile-command-map))
@@ -380,7 +416,8 @@
 (use-package go-mode
   :straight t
   :mode ("\\.go\\'")
-  :hook (go-mode . (lambda () (add-hook 'before-save-hook #'gofmt-before-save nil t))))
+  :hook (go-mode . (lambda ()
+                     (add-hook 'before-save-hook #'gofmt-before-save nil t))))
 
 (use-package typescript-mode
   :straight t
@@ -439,12 +476,15 @@
     (when (member system-name work-systems)
       (add-to-list 'org-capture-templates
             `(("m" "Meeting"
-               entry (file+headline ,(expand-file-name "meetings.org" user-documents-dir) "Meetings")
+               entry (file+headline
+                      ,(expand-file-name "meetings.org" user-documents-dir)
+                      "Meetings")
                "* %U %?"))))
     (when (member system-name personal-systems)
       (add-to-list 'org-capture-templates
                    `("j" "Journal Entry"
-                     entry (file+olp+datetree ,(expand-file-name "journal.gpg" user-documents-dir))
+                     entry (file+olp+datetree
+                            ,(expand-file-name "journal.gpg" user-documents-dir))
                      "* %<%Y-%m-%d %A %H:%M:%S> - %?" :empty-lines 1)))))
 
 

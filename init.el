@@ -525,6 +525,10 @@
 (use-package nordic-night-theme
   :straight t)
 
+(use-package modus-themes
+  :straight t
+  :if (< emacs-major-version 30))
+
 (use-package theme-timer
   :after nordic-night-theme
   :custom
@@ -535,27 +539,37 @@
 
 (use-package shenso-font-theme
   :config
-  (defun load-font-theme (&optional frame)
+  (defun activate-font-theme (&optional frame)
     (when (display-graphic-p)
-      (load-theme 'shenso-font t)))
-  (call-on-client-frame-init load-font-theme))
+      (if (custom-theme-p 'shenso-font)
+          (progn
+            (refresh-shenso-font-faces)
+            (enable-theme 'shenso-font))
+        (load-theme 'shenso-font t))))
+
+  (call-on-client-frame-init activate-font-theme)
+  (with-eval-after-load 'theme-timer
+    (add-hook 'theme-timer-change-hook #'refresh-shenso-font-faces)))
 
 (use-package org-pretty-theme ; homemade with love :)
   :after org
   :config
-  (defun load-org-theme (&optional frame)
+  (defun activate-org-theme (&optional frame)
     (when (display-graphic-p)
-      (load-theme 'org-pretty t)))
-  (defun update-org-hide-faces ()
-    (set-face-attribute 'org-hide nil
-                        :foreground (face-attribute 'default :foreground)
-                        :background (face-attribute 'default :background)))
+      (if (custom-theme-p 'org-pretty)
+          (progn
+            (refresh-org-pretty-faces)
+            (enable-theme 'org-pretty))
+        (load-theme 'org-pretty t))))
 
-  (call-on-client-frame-init load-org-theme)
-  (call-on-client-frame-init update-org-hide-faces)
+  (defun reload-org-theme ()
+    (when (featurep 'shenso-font-theme)
+      (refresh-shenso-font-faces))
+    (reload-org-pretty))
 
+  (call-on-client-frame-init activate-org-theme)
   (with-eval-after-load 'theme-timer
-    (add-hook 'theme-timer-change-hook #'update-org-hide-faces)))
+    (add-hook 'theme-timer-change-hook #'reload-org-theme)))
 
 (use-package nyan-mode
   :straight t

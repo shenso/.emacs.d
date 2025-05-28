@@ -67,6 +67,16 @@ current theme was made."
       (run-hooks 'theme-timer-change-hook))
     dirty))
 
+(defun theme-timer-use-day-time-theme ()
+  (interactive)
+  (theme-timer-use-theme theme-timer-day-time-theme
+                         theme-timer-night-time-theme))
+
+(defun theme-timer-use-night-time-theme ()
+  (interactive)
+  (theme-timer-use-theme theme-timer-night-time-theme
+                         theme-timer-day-time-theme))
+
 (defun theme-timer-use-time-appropriate-theme ()
   (interactive)
   (let* ((decoded-current-time (decode-time (current-time)))
@@ -77,10 +87,8 @@ current theme was made."
                      (and (>= current-hour theme-timer-night-time-hour)
                           (< current-hour theme-timer-day-time-hour)))))
     (if is-night
-        (theme-timer-use-theme theme-timer-night-time-theme
-                               theme-timer-day-time-theme)
-      (theme-timer-use-theme theme-timer-day-time-theme
-                             theme-timer-night-time-theme))
+        (theme-timer-use-night-time-theme)
+      (theme-timer-use-day-time-theme))
     is-night))
 
 (defun theme-timer-init ()

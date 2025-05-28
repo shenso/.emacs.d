@@ -34,10 +34,14 @@
 (deftheme shenso-font
   "My basic font theme")
 
-(custom-theme-set-faces
- 'shenso-font
- `(default     ((nil (:font ,(shenso-font-name)))))
- `(fixed-pitch ((nil (:font ,(shenso-font-name))))))
+(defun refresh-shenso-font-faces ()
+  (interactive)
+  (custom-theme-set-faces
+   'shenso-font
+   `(default     ((nil (:font ,(shenso-font-name)))))
+   `(fixed-pitch ((nil (:font ,(shenso-font-name)))))))
+
+(refresh-shenso-font-faces)
 
 (provide-theme 'shenso-font)
 (provide 'shenso-font-theme)

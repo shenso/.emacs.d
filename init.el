@@ -94,6 +94,7 @@
          (prog-mode . hl-line-mode))
   :custom
   (help-window-keep-selected t)
+  (read-file-name-completion-ignore-case t)
   :config
   ;; move temp files, autosave, etc out of config dir
   (setq backup-directory-alist
@@ -131,6 +132,11 @@
   (setq-default tab-width 4
                 indent-tabs-mode nil)
 
+  ;; keybinds
+  (with-eval-after-load 'evil
+    (evil-define-key 'normal Buffer-menu-mode-map
+      (kbd "<return>") #'Buffer-menu-this-window))
+
   ;; debian puts emacs docs in the non-free repo, which I am NOT addding, so
   ;; thats why this is here.
   (when (file-exists-p user-emacs-docs-dir)
@@ -155,12 +161,21 @@
 
 (use-package dired
   :hook (dired-mode . dired-hide-details-mode)
+  :custom
+  (dired-dwim-target t)
   :config
   (when (or (eq system-type 'gnu/linux) (executable-find "gls"))
     (when (executable-find "gls")
       (setq insert-directory-program "gls"))
     (setq dired-listing-switches
-          "-al --group-directories-first --indicator-style=slash")))
+          "-alv --group-directories-first --indicator-style=slash"))
+  (with-eval-after-load 'evil
+    (evil-define-key 'normal dired-mode-map
+      "f" #'find-name-dired
+      "p" #'find-lisp-find-dired
+      "P" #'find-lisp-find-dired-other-window
+      "n" #'find-lisp-find-dired-filter
+      "F" #'find-grep-dired)))
 
 (use-package eshell
   :defer t
@@ -205,7 +220,18 @@
     :config
     ;; builtin mode maps
     (evil-collection-init
-     '(calendar custom debug diff-mode dired edebug eshell grep help info))
+     '(calendar
+       custom
+       debug
+       diff-mode
+       dired
+       edebug
+       eshell
+       grep
+       help
+       image-dired
+       info
+       wdired))
 
     ;; package mode maps
     (with-eval-after-load 'magit (evil-collection-magit-setup))
@@ -356,6 +382,10 @@
 (use-package dired-subtree
   :straight t)
 
+(use-package dired-subtree-hack
+  :after dired-subtree
+  :if (or (eq system-type 'gnu/linux) (executable-find "gls")))
+
 (use-package ivy
   :straight t
   :config
@@ -365,6 +395,8 @@
   :straight t
   :bind-keymap (("C-c p" . projectile-command-map)
                 ("s-p"   . projectile-command-map))
+  :custom
+  (projectile-switch-project-action #'projectile-dired)
   :config
   (setq projectile-key
         (cond ((eq system-type 'darwin) (kbd "s-p"))

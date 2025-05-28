@@ -451,19 +451,15 @@
 
 ;;; appearance
 (use-package nordic-night-theme
-  :straight t
+  :straight t)
+
+(use-package theme-timer
+  :after nordic-night-theme
+  :custom
+  (theme-timer-day-time-theme 'modus-operandi-tritanopia)
+  (theme-timer-night-time-theme 'nordic-night)
   :config
-  (defun use-nordic-theme (&optional frame)
-    (interactive)
-    (load-theme 'nordic-night t)
-    (with-eval-after-load 'org
-      (set-face-attribute 'org-hide nil
-                          :foreground (face-attribute 'default :foreground)
-                          :background (face-attribute 'default :background))))
-  (defun use-default-theme ()
-    (interactive)
-    (disable-theme 'nordic-night))
-  (call-on-client-frame-init use-nordic-theme))
+  (theme-timer-init))
 
 (use-package shenso-font-theme
   :config
@@ -478,13 +474,29 @@
   (defun load-org-theme (&optional frame)
     (when (display-graphic-p)
       (load-theme 'org-pretty t)))
-  (call-on-client-frame-init load-org-theme))
+  (defun update-org-hide-faces ()
+    (set-face-attribute 'org-hide nil
+                        :foreground (face-attribute 'default :foreground)
+                        :background (face-attribute 'default :background)))
+
+  (call-on-client-frame-init load-org-theme)
+  (call-on-client-frame-init update-org-hide-faces)
+
+  (with-eval-after-load 'theme-timer
+    (add-hook 'theme-timer-change-hook #'update-org-hide-faces)))
 
 (use-package nyan-mode
   :straight t
+  :after theme-timer
   :init
   (setq nyan-minimum-window-length 120
         nyan-wavy-trail t)
   :config
-  (nyan-mode 1)
-  (nyan-start-animation))
+  (defun setup-nyan-mode ()
+    (if (memq theme-timer-night-time-theme custom-enabled-themes)
+        (progn
+          (nyan-mode 1)
+          (nyan-start-animation))
+      (nyan-mode -1)))
+  (setup-nyan-mode)
+  (add-hook 'theme-timer-change-hook #'setup-nyan-mode))

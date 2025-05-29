@@ -339,11 +339,21 @@
             :build (:not compile))
   :after (markdown-mode yasnippet)
   :if (file-exists-p user-lsp-bridge-dir)
+  :init
+  (defun enable-lsp-bridge-if-local-file ()
+    (unless (file-remote-p default-directory)
+      (lsp-bridge-mode)))
+  :hook ((elisp-mode  . enable-lsp-bridge-if-local-file)
+         (python-mode . enable-lsp-bridge-if-local-file)
+         (go-mode     . enable-lsp-bridge-if-local-file)
+         (dart-mode   . enable-lsp-bridge-if-local-file))
   :defer nil
   :custom
   (acm-enable-copilot nil)
   (lsp-bridge-enable-hover-diagnostic t)
   :config
+  (setq lsp-bridge-enable-with-tramp nil)
+
   (setq lsp-bridge-python-command
         (expand-file-name ".venv/bin/python" user-lsp-bridge-dir))
   (require 'acm-backend-elisp)
@@ -417,6 +427,8 @@
                 ("s-p"   . projectile-command-map))
   :custom
   (projectile-switch-project-action #'projectile-dired)
+  :init
+  (setq project-mode-line "Projectile") ; avoid tramp overhead
   :config
   (setq projectile-key
         (cond ((eq system-type 'darwin) (kbd "s-p"))
@@ -428,6 +440,11 @@
         projectile-known-projects-file (expand-file-name
                                         "projectile-known-projects.eld"
                                         user-emacs-state-dir))
+
+  (defadvice projectile-project-root (around ignore-remote first activate)
+    (unless (file-remote-p default-directory)
+      ad-do-it))
+
   (projectile-global-mode)
   (projectile-discover-projects-in-search-path)
   (define-key projectile-mode-map projectile-key 'projectile-command-map))

@@ -167,11 +167,27 @@
   (dired-kill-when-opening-new-dired-buffer t)
   (dired-dwim-target t)
   :config
-  (when (or (eq system-type 'gnu/linux) (executable-find "gls"))
-    (when (executable-find "gls")
-      (setq insert-directory-program "gls"))
-    (setq dired-listing-switches
-          "-alv --group-directories-first --indicator-style=slash")))
+  (defun setup-dired-command ()
+    (cond ((or (memq system-type '(gnu gnu/linux gnu/kfreebsd))
+               (executable-find "gls"))
+           (progn
+             (when (executable-find "gls")
+               (setq insert-directory-program "gls"))
+             (setq dired-listing-switches "-alvF --group-directories-first")
+             (setq do-dired-subtree-hack t)))
+          ((eq system-type 'darwin)
+           ;; -F affects symbolic links on POSIX, but not darwin nor GNU it seems
+           (setq dired-listing-switches "-alF")
+           ;; -A switch is on BSD, but is not POSIX. I would add other BSDs to
+           ;; the predicate, but Darwin appears to be the only supported non-GNU
+           ;; BSD.
+           (setq do-dired-subtree-hack t))
+          ;; womp womp
+          (t
+           (setq dired-listing-switches "-al"))))
+  ;; allow exec-path-to-shell to both run and initialize, but also set up if
+  ;; it doesn't load. command changes are purely cosmetic.
+  (add-hook 'after-init-hook #'setup-dired-command))
 
 (use-package eshell
   :defer t

@@ -25,11 +25,15 @@
 
 ;; just adds a switch to the ls command for subdirectories to exclude "." and
 ;; "..". should only be used with GNU coreutils
+(defvar do-dired-subtree-hack nil)
+
 (defun shenso-dired-subtree--readin (dir-name)
   (with-temp-buffer
     (insert-directory
      dir-name
-     (concat dired-listing-switches " -A")
+     (if do-dired-subtree-hack
+         (string-replace "-a" "-A" dired-listing-switches)
+       dired-listing-switches)
      nil t)
     (delete-char -1)
     (goto-char (point-min))

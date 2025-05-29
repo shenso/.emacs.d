@@ -251,17 +251,16 @@
                                                   (quit-window t)))
 
     ;; package mode maps
-    (with-eval-after-load 'ement (evil-collection-ement-setup))
-    (with-eval-after-load 'ivy (evil-collection-ivy-setup))
-    (with-eval-after-load 'magit (evil-collection-magit-setup)))
+    (eval-after-load 'ement #'evil-collection-ement-setup)
+    (eval-after-load 'ivy #'evil-collection-ivy-setup)
+    (eval-after-load 'magit #'evil-collection-magit-setup))
 
 (use-package evil-dired
   :after evil
   :config
   (evil-dired-setup)
   (unless (featurep 'evil-collection)
-    (with-eval-after-load 'evil-collection
-      (evil-dired-setup))))
+    (eval-after-load 'evil-collection #'evil-dired-setup)))
 
 (use-package evil-org
     :straight t

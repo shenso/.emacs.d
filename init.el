@@ -235,8 +235,9 @@
                                                   (quit-window t)))
 
     ;; package mode maps
-    (with-eval-after-load 'magit (evil-collection-magit-setup))
-    (with-eval-after-load 'ivy (evil-collection-ivy-setup)))
+    (with-eval-after-load 'ement (evil-collection-ement-setup))
+    (with-eval-after-load 'ivy (evil-collection-ivy-setup))
+    (with-eval-after-load 'magit (evil-collection-magit-setup)))
 
 (use-package evil-dired
   :after evil
@@ -370,6 +371,10 @@
   (with-eval-after-load 'theme-timer
     (add-hook 'theme-timer-change-hook (lambda ()
                                          (acm-frame-init-colors t)))))
+
+(use-package ement
+  :straight t
+  :commands ement-connect)
 
 (use-package gptel
   :straight t

@@ -613,11 +613,11 @@
   (when user-documents-dir
     (when (member system-name work-systems)
       (add-to-list 'org-capture-templates
-            `(("m" "Meeting"
+            `("m" "Meeting"
                entry (file+headline
                       ,(expand-file-name "meetings.org" user-documents-dir)
                       "Meetings")
-               "* %U %?"))))
+               "* %U %?")))
     (when (member system-name personal-systems)
       (add-to-list 'org-capture-templates
                    `("j" "Journal Entry"

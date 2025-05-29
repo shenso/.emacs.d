@@ -359,10 +359,11 @@
   (defun enable-lsp-bridge-if-local-file ()
     (unless (file-remote-p default-directory)
       (lsp-bridge-mode)))
-  :hook ((elisp-mode  . enable-lsp-bridge-if-local-file)
-         (python-mode . enable-lsp-bridge-if-local-file)
-         (go-mode     . enable-lsp-bridge-if-local-file)
-         (dart-mode   . enable-lsp-bridge-if-local-file))
+  :hook ((elisp-mode      . enable-lsp-bridge-if-local-file)
+         (python-mode     . enable-lsp-bridge-if-local-file)
+         (go-mode         . enable-lsp-bridge-if-local-file)
+         (dart-mode       . enable-lsp-bridge-if-local-file)
+         (typescript-mode . enable-lsp-bridge-if-local-file))
   :defer nil
   :custom
   (acm-enable-copilot nil)

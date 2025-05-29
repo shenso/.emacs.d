@@ -18,7 +18,8 @@
   (coalesce-font
    "-*-Menlo-regular-normal-normal-*-11-*-*-*-m-0-iso10646-1"
    (concat "DejaVu Sans Mono:pixelsize=13:foundry=PfEd:weight=regular"
-           ":slant=normal:width=normal:spacing=100:scalable=true")))
+           ":slant=normal:width=normal:spacing=100:scalable=true")
+   (face-attribute 'default :font)))
 
 (defun shenso-font--large-fonts ()
   (coalesce-font
@@ -36,12 +37,20 @@
 
 (defun refresh-shenso-font-faces ()
   (interactive)
-  (custom-theme-set-faces
-   'shenso-font
-   `(default     ((nil (:font ,(shenso-font-name)))))
-   `(fixed-pitch ((nil (:font ,(shenso-font-name)))))))
+  (when (shenso-font-name)
+    (custom-theme-set-faces
+     'shenso-font
+     `(default     ((((type graphic)) (:font ,(shenso-font-name)))))
+     `(fixed-pitch ((((type graphic)) (:font ,(shenso-font-name))))))))
 
-(refresh-shenso-font-faces)
+(defun reload-shenso-font ()
+  (interactive)
+  (refresh-shenso-font-faces)
+  (when (memq 'shenso-font custom-enabled-themes)
+    (disable-theme 'shenso-font)
+    (enable-theme 'shenso-font)))
+
+(call-on-client-frame-init reload-shenso-font)
 
 (provide-theme 'shenso-font)
 (provide 'shenso-font-theme)

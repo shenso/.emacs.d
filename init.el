@@ -363,7 +363,13 @@
 
   (add-to-list 'display-buffer-alist
                '("\\*lsp-bridge-doc\\*"
-                 (display-buffer-use-least-recent-window))))
+                 (display-buffer-use-least-recent-window)))
+
+  ;; when the theme changes the autocomplete menu uses the old background color.
+  ;; this lambda forcefully resets the face colors.
+  (with-eval-after-load 'theme-timer
+    (add-hook 'theme-timer-change-hook (lambda ()
+                                         (acm-frame-init-colors t)))))
 
 (use-package gptel
   :straight t
@@ -544,41 +550,17 @@
   (theme-timer-day-time-theme 'modus-operandi-tritanopia)
   (theme-timer-night-time-theme 'nordic-night)
   :config
-  (theme-timer-init))
+  (call-on-client-frame-init theme-timer-init))
 
 (use-package shenso-font-theme
   :config
-  (defun activate-font-theme (&optional frame)
-    (when (display-graphic-p)
-      (if (custom-theme-p 'shenso-font)
-          (progn
-            (refresh-shenso-font-faces)
-            (enable-theme 'shenso-font))
-        (load-theme 'shenso-font t))))
-
-  (call-on-client-frame-init activate-font-theme)
-  (with-eval-after-load 'theme-timer
-    (add-hook 'theme-timer-change-hook #'refresh-shenso-font-faces)))
+  (load-theme 'shenso-font t))
 
 (use-package org-pretty-theme ; homemade with love :)
-  :after org
   :config
-  (defun activate-org-theme (&optional frame)
-    (when (display-graphic-p)
-      (if (custom-theme-p 'org-pretty)
-          (progn
-            (refresh-org-pretty-faces)
-            (enable-theme 'org-pretty))
-        (load-theme 'org-pretty t))))
-
-  (defun reload-org-theme ()
-    (when (featurep 'shenso-font-theme)
-      (refresh-shenso-font-faces))
-    (reload-org-pretty))
-
-  (call-on-client-frame-init activate-org-theme)
+  (load-theme 'org-pretty t)
   (with-eval-after-load 'theme-timer
-    (add-hook 'theme-timer-change-hook #'reload-org-theme)))
+    (add-hook 'theme-timer-change-hook #'reload-org-pretty)))
 
 (use-package nyan-mode
   :straight t

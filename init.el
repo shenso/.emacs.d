@@ -484,9 +484,35 @@
                                         "projectile-known-projects.eld"
                                         user-emacs-state-dir))
 
+  ;; avoid activity on tramp
   (defadvice projectile-project-root (around ignore-remote first activate)
     (unless (file-remote-p default-directory)
       ad-do-it))
+
+  ;; ignore packages with git directories
+  (setq shenso-ignore-project-paths
+        `(,(expand-file-name "straight/" user-emacs-data-dir)))
+  (defun shenso-ignore-project-p (file)
+    (if (file-remote-p file)
+        t
+      (progn
+        (let* ((abs-file-name (expand-file-name file))
+               (file-parts (file-name-split abs-file-name))
+               (num-file-parts (length file-parts))
+               (ignore-path-found nil)
+               (tail shenso-ignore-project-paths))
+          (print abs-file-name)
+          (while (and tail (not ignore-path-found))
+            (let* ((v (car tail))
+                   (path-parts (-butlast (file-name-split v)))
+                   (num-path-parts (length path-parts)))
+              (print v)
+              (unless (> num-path-parts num-file-parts)
+                (setq ignore-path-found
+                      (equal path-parts (take num-path-parts file-parts))))
+              (setq tail (cdr tail))))
+          ignore-path-found))))
+    (setq projectile-ignored-project-function #'shenso-ignore-project-p)
 
   (projectile-global-mode)
   (projectile-discover-projects-in-search-path)

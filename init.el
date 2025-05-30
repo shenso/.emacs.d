@@ -501,12 +501,10 @@
                (num-file-parts (length file-parts))
                (ignore-path-found nil)
                (tail shenso-ignore-project-paths))
-          (print abs-file-name)
           (while (and tail (not ignore-path-found))
             (let* ((v (car tail))
                    (path-parts (-butlast (file-name-split v)))
                    (num-path-parts (length path-parts)))
-              (print v)
               (unless (> num-path-parts num-file-parts)
                 (setq ignore-path-found
                       (equal path-parts (take num-path-parts file-parts))))
@@ -648,10 +646,9 @@
   (load-theme 'shenso-font t))
 
 (use-package org-pretty-theme ; homemade with love :)
+  :after theme-timer
   :config
-  (load-theme 'org-pretty t)
-  (with-eval-after-load 'theme-timer
-    (add-hook 'theme-timer-change-hook #'reload-org-pretty)))
+  (add-hook 'theme-timer-change-hook #'reload-org-pretty))
 
 (use-package nyan-mode
   :straight t

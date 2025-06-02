@@ -651,6 +651,16 @@
   :config
   (add-hook 'theme-timer-change-hook #'reload-org-pretty))
 
+(use-package all-the-icons
+  :straight t
+  :if (or (display-graphic-p) (daemonp)))
+
+(use-package all-the-icons-dired
+  :straight t
+  :after all-the-icons
+  :if (or (display-graphic-p) (daemonp))
+  :hook (dired-mode . all-the-icons-dired-mode))
+
 (use-package nyan-mode
   :straight t
   :after theme-timer

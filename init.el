@@ -536,7 +536,8 @@
                 '((c-mode . "k&r")
                   (c++-mode . "k&r")
                   (csharp-mode . "bsd")
-                  (other . "java"))))
+                  (other . "java")))
+  (setq-default c-basic-offset 4))
 
 (use-package dart-mode
   :straight t

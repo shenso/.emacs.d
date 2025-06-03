@@ -362,7 +362,8 @@
          (python-mode     . enable-lsp-bridge-if-local-file)
          (go-mode         . enable-lsp-bridge-if-local-file)
          (dart-mode       . enable-lsp-bridge-if-local-file)
-         (typescript-mode . enable-lsp-bridge-if-local-file))
+         (typescript-mode . enable-lsp-bridge-if-local-file)
+         (c-mode          . enable-lsp-bridge-if-local-file))
   :defer nil
   :custom
   (acm-enable-copilot nil)

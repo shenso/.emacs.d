@@ -644,7 +644,9 @@
   (theme-timer-day-time-theme 'modus-operandi-tritanopia)
   (theme-timer-night-time-theme 'nordic-night)
   :config
-  (call-on-client-frame-init theme-timer-init))
+  (if (daemonp)
+      (call-on-client-frame-init theme-timer-init)
+    (add-hook 'after-init-hook #'theme-timer-init)))
 
 (use-package shenso-font-theme
   :config
@@ -653,7 +655,8 @@
 (use-package org-pretty-theme ; homemade with love :)
   :after theme-timer
   :config
-  (add-hook 'theme-timer-change-hook #'reload-org-pretty))
+  (add-hook 'theme-timer-change-hook #'reload-org-pretty)
+  (enable-theme 'org-pretty))
 
 (use-package all-the-icons
   :straight t

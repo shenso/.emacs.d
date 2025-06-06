@@ -352,23 +352,23 @@
             :files (:defaults "*.el" "*.py" "acm" "core" "langserver"
                               "multiserver" "resources")
             :build (:not compile))
-  :after (markdown-mode yasnippet)
+  :after (yasnippet)
   :if (file-exists-p user-lsp-bridge-dir)
   :init
   (defun enable-lsp-bridge-if-local-file ()
     (unless (file-remote-p default-directory)
       (lsp-bridge-mode)))
-  :hook ((elisp-mode      . enable-lsp-bridge-if-local-file)
-         (python-mode     . enable-lsp-bridge-if-local-file)
-         (go-mode         . enable-lsp-bridge-if-local-file)
-         (dart-mode       . enable-lsp-bridge-if-local-file)
-         (typescript-mode . enable-lsp-bridge-if-local-file)
-         (c-mode          . enable-lsp-bridge-if-local-file))
-  :defer nil
+  :hook ((emacs-lisp-mode      . enable-lsp-bridge-if-local-file)
+         (python-mode          . enable-lsp-bridge-if-local-file)
+         (go-mode              . enable-lsp-bridge-if-local-file)
+         (dart-mode            . enable-lsp-bridge-if-local-file)
+         (typescript-mode      . enable-lsp-bridge-if-local-file)
+         (c-mode               . enable-lsp-bridge-if-local-file))
   :custom
   (acm-enable-copilot nil)
   (lsp-bridge-enable-hover-diagnostic t)
   :config
+  (require 'markdown-mode)
   (setq lsp-bridge-enable-with-tramp nil)
 
   (setq lsp-bridge-python-command
@@ -401,6 +401,7 @@
 
 (use-package dape
   :straight t
+  :defer t
   :init
   (setq dape-prefix-key "\C-x\C-a")
   :config
@@ -597,7 +598,8 @@
   :after csv-mode)
 
 (use-package markdown-mode
-  :straight t)
+  :straight t
+  :defer t)
 
 (use-package yaml-mode
   :straight t

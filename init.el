@@ -561,6 +561,9 @@
   :straight t
   :mode ("\\.ts\\'"))
 
+(use-package bigquery
+  :straight '(bigquery :type git :host github :repo "shenso/bigquery.el"))
+
 ;; this sucks and has insane defaults, but it sucks less than default sql-mode
 (use-package sql-indent
   :straight t

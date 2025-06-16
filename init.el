@@ -35,7 +35,6 @@
                         :warning
                         "*Warnings*")))))
 
-
 ;;; global config variables
 ;; general-purpose directories
 (set-user-dir
@@ -565,28 +564,16 @@
 (use-package bigquery
   :straight '(bigquery :type git :host github :repo "shenso/bigquery.el"))
 
-;; this sucks and has insane defaults, but it sucks less than default sql-mode
 (use-package sql-indent
   :straight t
-  :after sql-mode
+  :after sql
   :config
-  (defun setup-sql-indent ()
-    (setq sqlind-indentation-offsets-alist
-          `((select-clause 0)
-            (insert-clause 0)
-            (delete-clause 0)
-            (update-clause 0)
-            (with-clause sqlind-use-anchor-indentation)
-            (with-clause-cte-cont 0)
-            (statement-continuation 0)
-            (select-join-condition 0)
-            (select-table 0)
-            (select-table-continuation 0)
-            (select-join-condition 0)
-            (case-clause 0)
-            ,@sqlind-default-indentation-offsets-alist))
-    (setq sqlind-basic-offset 4))
-  (add-hook 'sqlind-minor-mode-hook #'setup-sql-indent))
+  (setq-default sqlind-indentation-offsets-alist
+                `((select-clause 0)
+                  (insert-clause 0)
+                  (delete-clause 0)
+                  (update-clause 0)
+                  ,@sqlind-default-indentation-offsets-alist)))
 
 ;; text-mode derivatives
 (use-package csv-mode

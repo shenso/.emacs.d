@@ -649,7 +649,10 @@
 
 (use-package bigquery
   :straight '(bigquery :type git :host github :repo "shenso/bigquery.el")
-  :if (member (system-name) (cons "plato" work-systems)))
+  :if (member (system-name) (cons "plato" work-systems))
+  :config
+  (when (member (system-name) work-systems)
+    (add-to-list 'auto-mode-alist '("\\.sql\\'" . googlesql-mode))))
 
 (use-package sql-indent
   :straight t

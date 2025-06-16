@@ -218,9 +218,10 @@
                       (turn-on-evil-mode)
                       (evil-normal-state)))
          ("C-c ]" . turn-off-evil-mode))
-  :init
-  (setq evil-want-integration t
-        evil-want-keybinding nil)
+  :custom
+  (evil-want-integration t)
+  (evil-want-keybinding nil)
+  (evil-want-C-u-scroll t)
   :hook (after-init . evil-mode)
   :config
   (evil-set-undo-system 'undo-redo))

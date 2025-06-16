@@ -563,7 +563,10 @@
   :mode ("\\.ts\\'"))
 
 (use-package bigquery
-  :straight '(bigquery :type git :host github :repo "shenso/bigquery.el"))
+  :straight '(bigquery :type git :host github :repo "shenso/bigquery.el")
+  :config
+  (when (member (system-name) work-systems)
+    (add-to-list 'auto-mode-alist '("\\.sql\\'" . googlesql-mode))))
 
 (use-package sql-indent
   :straight t

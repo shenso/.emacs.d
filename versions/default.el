@@ -1,7 +1,7 @@
 (("all-the-icons-dired" . "e157f0668f22ed586aebe0a2c0186ab07702986c")
  ("all-the-icons.el" . "4778632b29c8c8d2b7cd9ce69535d0be01d846f9")
  ("annalist.el" . "e1ef5dad75fa502d761f70d9ddf1aeb1c423f41d")
- ("bigquery.el" . "888a8f5107943138601e0d79d5dfae66c4ac2957")
+ ("bigquery.el" . "efa50eb25bba1526e456166d3d9d4a76d86daf2f")
  ("bind-key" . "aa22c8c3c740c2f306509b9c37d9511cfa41b612")
  ("compat" . "2aee8353772745bb18db1ca63729a7f5ea572a74")
  ("csv-mode" . "1695ee17521d55dbe94caacaef5a94dfa933cd9f")

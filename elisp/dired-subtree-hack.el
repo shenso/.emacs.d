@@ -23,17 +23,18 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
 ;; just adds a switch to the ls command for subdirectories to exclude "." and
-;; "..". should only be used with GNU coreutils
-(defvar do-dired-subtree-hack nil)
+;; "..".  Should only be used with GNU coreutils.
+
+;;; Code:
 
 (defun shenso-dired-subtree--readin (dir-name)
   (with-temp-buffer
     (insert-directory
      dir-name
-     (if do-dired-subtree-hack
-         (string-replace "-a" "-A" dired-listing-switches)
-       dired-listing-switches)
+     (string-replace "-a" "-A" dired-listing-switches)
      nil t)
     (delete-char -1)
     (goto-char (point-min))
@@ -52,7 +53,10 @@
     (delete-char -2)
     (buffer-string)))
 
-(advice-add 'dired-subtree--readin
-            :override #'shenso-dired-subtree--readin)
+(defun install-dired-subtree-hack()
+  (advice-add 'dired-subtree--readin
+              :override #'shenso-dired-subtree--readin))
+
 
 (provide 'dired-subtree-hack)
+;;; dired-subtree-hack.el ends here

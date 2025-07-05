@@ -1,6 +1,4 @@
-;; -*- lexical-binding: t; -*-
-
-;;; theme-timer.el --- put your themes on day/night cycles
+;;; theme-timer.el --- Day/Night cycles for themes -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2025 Shawn Henson
 
@@ -17,9 +15,14 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;;; Code:
+
 (defgroup theme-timer nil
   "Time based theme switching."
-  :prefix "theme-timer-")
+  :prefix "theme-timer-"
+  :group 'faces)
 
 (defcustom theme-timer-day-time-theme nil
   "The theme to use during daytime."
@@ -47,13 +50,12 @@
   :group 'theme-timer)
 
 (defvar theme-timer--timer nil
-  "The timer that calls the init function, which updates the theme if needed and
-resets the timer to the appropriate hour.")
+  "The internal timer used by theme-timer.")
 
 (defun theme-timer-use-theme (target other)
-  "Disables the theme OTHER if enabled, and enables or loads TARGET if it's not
-enabled or loaded. nil values are ignored. Returns non-nil if any change to the
-current theme was made."
+  "Disable the theme OTHER if enabled, and enable or load TARGET if it's not.
+nil values are ignored.  Returns non-nil if any change to the current theme was
+made."
   (let ((dirty nil))
     (when (and other (memq other custom-enabled-themes))
       (disable-theme other)
@@ -91,6 +93,7 @@ current theme was made."
       (theme-timer-use-day-time-theme))
     is-night))
 
+;;;###autoload
 (defun theme-timer-init ()
   (theme-timer-use-time-appropriate-theme)
   (when theme-timer--timer
@@ -112,4 +115,8 @@ current theme was made."
     (setq theme-timer--timer (run-with-timer num-seconds nil #'theme-timer-init))
     theme-timer--timer))
 
+(defun theme-timer-stop ()
+  (cancel-timer theme-timer--timer))
+
 (provide 'theme-timer)
+;;; theme-timer.el ends here

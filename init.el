@@ -1,4 +1,4 @@
-;;; init.el by Shawn Henson -*- lexical-binding: t; -*-
+;;; init.el --- Shawn Henson's personal GNU Emacs config -*- lexical-binding: t; -*-
 
 ;; To the extent possible under law, the person who associated CC0 with
 ;; init.el has waived all copyright and related or neighboring rights
@@ -7,103 +7,221 @@
 ;; You should have received a copy of the CC0 legalcode along with this
 ;; work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-;;; homebrew feature/theme discovery
-(let ((elisp-dir (expand-file-name "elisp/" user-emacs-directory))
-      (theme-dir (expand-file-name "themes/" user-emacs-directory)))
-  (when (file-exists-p elisp-dir)
-    (add-to-list 'load-path elisp-dir))
-  (when (file-exists-p theme-dir)
-    (add-to-list 'load-path theme-dir)
-    (setq custom-theme-directory theme-dir)))
+;;; Commentary:
 
-;; load common features
-(require 'macros)
+;;; Code:
+
+;;;; set-up load path and initial requirements:
+(add-to-list 'load-path (expand-file-name "elisp/" user-emacs-directory))
+(add-to-list 'load-path (expand-file-name "themes/" user-emacs-directory))
+(setq custom-theme-directory (expand-file-name "themes/" user-emacs-directory))
+
+;; personal libraries:
 (require 'package-helper)
+(require 'shenso-macros)
+(require 'shenso-secrets)
+;; built-in libraries:
+(require 'help)
+(require 'info)
 
-(unless (memq epa-file-handler file-name-handler-alist)
-    (epa-file-enable))
-(defun shenso-ensure-secrets ()
-  (unless (boundp 'shenso-secrets-loaded)
-    (setq shenso-secrets-loaded nil))
-  (unless shenso-secrets-loaded
-    (condition-case err
-        (load-file (expand-file-name "secrets.el.gpg" user-emacs-directory))
-      (error
-       (display-warning 'shenso-secrets
-                        (format "Could not load secrets: %s"
-                                (error-message-string err))
-                        :warning
-                        "*Warnings*")))))
+;;;; Customizations:
+(defgroup shenso ()
+  "My personal customization options."
+  :group 'local
+  :prefix "shenso-")
 
-;;; global config variables
-;; general-purpose directories
-(set-user-dir
- user-cache-dir     (coalesce (getenv "XDG_CACHE_HOME")
-                              ;; TODO: find the appropriate dir for cache 
-                              ;;       particularly..... if i ever even bother
-                              ;;       to use emacs with windows
-                              (when (eq system-type 'windows-nt)
-                                (getenv "APPDATA"))
-                              "~/.local/cache")
- user-data-dir      (coalesce (getenv "XDG_DATA_HOME")
-                              (when (eq system-type 'windows-nt)
-                                (getenv "APPDATA"))
-                              "~/.local/share")
- user-state-dir     (coalesce (getenv "XDG_STATE_HOME")
-                              (when (eq system-type 'windows-nt)
-                                (getenv "APPDATA"))
-                              "~/.local/state")
- user-documents-dir (coalesce (getenv "XDG_DOCUMENTS_DIR")
-                              (when (memq system-type '(darwin windows-nt))
-                                "~/Documents")
-                              "~/documents")
- user-projects-dir  (cond
-                     ((memq system-type '(darwin windows-nt)) "~/Projects")
-                     (t "~/projects")))
+(defgroup shenso-directories ()
+  "Directory customizations."
+  :group 'shenso)
 
-(setq user-emacs-cache-dir (expand-file-name "emacs/"     user-cache-dir)
-      user-emacs-data-dir  (expand-file-name "emacs/"     user-data-dir)
-      user-emacs-docs-dir  (expand-file-name "doc/emacs/" user-data-dir)
-      user-emacs-state-dir (expand-file-name "emacs/"     user-state-dir))
+(defgroup shenso-user-directories ()
+  "Shared directories for my local user.  E.g. cache, config, data, etc."
+  :group 'shenso-directories)
+
+(defgroup shenso-emacs-directories ()
+  "Directories used by GNU Emacs."
+  :group 'shenso-directories)
+
+(defgroup shenso-emacs-package-directories ()
+  "Directories used by GNU Emacs packages."
+  :group 'shenso-emacs-directories)
+
+(defgroup shenso-misc-directories ()
+  "Directories of non-Emacs programs and dependencies."
+  :group 'shenso)
+
+(defgroup shenso-systems ()
+  "System classifications."
+  :group 'shenso)
+
+;;; Custom user directories:
+(defcustom user-cache-dir
+  (abs-dir (or (getenv "XDG_CACHE_HOME")
+               (and (eq system-type 'windows-nt) (getenv "APPDATA"))
+               "~/.local/cache"))
+  "User cache directory."
+  :type 'directory
+  :group 'shenso-user-directories)
+
+(defcustom user-data-dir
+  (abs-dir (or (getenv "XDG_DATA_HOME")
+               (if (eq system-type 'windows-nt)
+                 (getenv "APPDATA"))
+               "~/.local/share"))
+  "User data directory."
+  :type 'directory
+  :group 'shenso-user-directories)
+
+(defcustom user-state-dir
+  (abs-dir (or (getenv "XDG_STATE_HOME")
+               (if (eq system-type 'windows-nt)
+                 (getenv "APPDATA"))
+               "~/.local/state"))
+  "User state directory."
+  :type 'directory
+  :group 'shenso-user-directories)
+
+(defcustom user-documents-dir
+  (any-abs-dir (getenv "XDG_DOCUMENTS_DIR")
+               "~/documents"
+               "~/Documents")
+  "User documents directory."
+  :type 'directory
+  :group 'shenso-user-directories)
+
+(defcustom user-projects-dir
+  (any-abs-dir "~/projects"
+               "~/Projects")
+  "User projects directory."
+  :type 'directory
+  :group 'shenso-user-directories)
+
+;;; Custom Emacs directories
+(defcustom user-emacs-cache-dir
+  (expand-file-name "emacs/" user-cache-dir)
+  "Emacs cache directory."
+  :type 'directory
+  :group 'shenso-emacs-directories)
+
+(defcustom user-emacs-data-dir
+  (expand-file-name "emacs/" user-data-dir)
+  "Emacs data directory."
+  :type 'directory
+  :group 'shenso-emacs-directories)
+
+(defcustom user-emacs-docs-dir
+  (expand-file-name "emacs/docs" user-data-dir)
+  "Emacs documentation directory."
+  :type 'directory
+  :group 'shenso-emacs-directories)
+
+(defcustom user-emacs-state-dir
+  (expand-file-name "emacs" user-state-dir)
+  "Emacs state directory."
+  :type 'directory
+  :group 'shenso-emacs-directories)
+
+;;; Custom Emacs package directories:
+(defcustom user-lsp-bridge-venv-dir
+  (expand-file-name "lsp-bridge/.venv" user-emacs-data-dir)
+  "Directory of the python virtual environment for lsp-bridge."
+  :type 'directory
+  :group 'shenso-emacs-package-directories)
+
+;;; Dependency installation directories:
+(defcustom user-dart-sdk-dir
+  (expand-file-name "~/.local/opt/flutter/bin/cache/dart-sdk")
+  "Installation directory of the Dart SDK."
+  :type 'directory
+  :group 'shenso-misc-directories)
+
+(defcustom user-flutter-sdk-dir
+  (expand-file-name "~/.local/opt/flutter")
+  "Installation directory of the Dart SDK."
+  :type 'directory
+  :group 'shenso-misc-directories)
+
+;;; Custom system classifications:
+(defcustom personal-systems
+  '("plato")
+  "Systems used for personal computing."
+  :type '(set string)
+  :group 'shenso-systems)
+
+(defcustom work-systems
+  '("smith.local")
+  "Systems owned by an employer, or used solely for business purposes."
+  :type '(set string)
+  :group 'shenso-systems)
 
 (make-directory user-emacs-cache-dir :parents)
 (make-directory user-emacs-data-dir  :parents)
 (make-directory user-emacs-state-dir :parents)
-
-;; specific-purpose directories
-(setq user-lsp-bridge-dir (expand-file-name "lsp-bridge" user-emacs-data-dir))
-(set-user-dir user-dart-sdk-dir "~/.local/opt/flutter/bin/cache/dart-sdk"
-              user-flutter-sdk-dir "~/.local/opt/flutter")
-
-;; system lists
-(setq personal-systems '("plato")
-      work-systems     '("smith.local"))
 
 ;; reset display buffer action alist
 (setq display-buffer-alist nil)
 
 (bootstrap-use-package user-emacs-data-dir)
 
+;;; Helper functions, no external requirements:
+(defun display-max-column-line ()
+  "Display column line.  Max 100 typically, 80 for elisp."
+  (let ((max-col-no
+         (if (eq major-mode 'emacs-lisp-mode)
+             80
+           100)))
+    (set-fill-column max-col-no)
+    (display-fill-column-indicator-mode)))
+
+(define-inline work-system-p ()
+  (inline-quote (member (system-name) work-systems)))
+
+(define-inline personal-system-p ()
+  (inline-quote (member (system-name) personal-systems)))
+
+;;;; Package configurations:
 
 ;;; core emacs configurations. any symbols referenced here should be originally
 ;;; defined by Emacs's C source code, or an emacs lisp file which specifies
 ;;; "Emacs" as the package.
 (use-package emacs
+  :straight nil
   :hook ((prog-mode . display-line-numbers-mode)
          (prog-mode . hl-line-mode))
   :custom
+  ;; user information:
+  (user-full-name    "Shawn Henson")
+  (user-mail-address "shawn@shenso.name")
+
+  ;; trusted content:
+  (trusted-content (list
+                    ;; `trusted-content-p' only looks at relative paths for some
+                    ;; reason
+                    (string-replace (expand-file-name "~") "~"
+                                    (expand-file-name "elisp/" user-emacs-directory))
+                    (string-replace (expand-file-name "~") "~"
+                                    (expand-file-name "themes/" user-emacs-directory))
+                    (string-replace (expand-file-name "~") "~" user-projects-dir)))
+
+  ;; directories:
+  (backup-directory-alist `((".*" . ,temporary-file-directory)))
+  (auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+  (auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-"
+                                                temporary-file-directory))
+  (custom-file (expand-file-name "custom.el" user-emacs-directory))
+  (Info-additional-directory-list (list user-emacs-docs-dir))
+
+  ;; misc
   (help-window-keep-selected t)
   (read-file-name-completion-ignore-case t)
   (ring-bell-function #'ignore)
   (visible-bell nil)
+  (disabled-command-function nil)
+  (column-number-mode t)
+  (tab-width 4)
+  (indent-tabs-mode nil)
+
   :config
-  ;; move temp files, autosave, etc out of config dir
-  (setq backup-directory-alist
-        `((".*" . ,temporary-file-directory)))
-  (setq auto-save-file-name-transforms
-        `((".*" ,temporary-file-directory t)))
-  (setq auto-save-list-file-prefix
-        (expand-file-name "auto-save-list/.saves-" temporary-file-directory))
   ;; try to move eln files to cache dir
   (when (boundp 'native-comp-eln-load-path)
     (let ((new-eln-cache-dir (expand-file-name "eln-cache/"
@@ -111,37 +229,11 @@
       (make-directory new-eln-cache-dir :parents)
       (setcar native-comp-eln-load-path new-eln-cache-dir)))
 
-
-  ;; stop custom spam in init file
-  (setq disabled-command-function nil
-        custom-file (concat user-emacs-directory "custom.el"))
   (ignore-errors
     (load-file custom-file))
 
   ;; appearance
-  (setq column-number-mode t)
-  (defun display-max-column-line ()
-    (let ((max-col-no
-           (if (eq major-mode 'emacs-lisp-mode)
-               80
-             100)))
-      (set-fill-column max-col-no)
-      (display-fill-column-indicator-mode)))
   (add-hook 'prog-mode-hook #'display-max-column-line)
-
-  ;; indentation settings
-  (setq-default tab-width 4
-                indent-tabs-mode nil)
-
-  ;; keybinds
-  (with-eval-after-load 'evil
-    (evil-define-key 'normal Buffer-menu-mode-map
-      (kbd "<return>") #'Buffer-menu-this-window))
-
-  ;; debian puts emacs docs in the non-free repo, which I am NOT addding, so
-  ;; thats why this is here.
-  (when (file-exists-p user-emacs-docs-dir)
-    (add-to-list 'Info-additional-directory-list user-emacs-docs-dir))
 
   (add-hook 'emacs-startup-hook
             (lambda ()
@@ -155,73 +247,94 @@
                   (display-about-screen))))))
 
 (use-package bookmark
-  :defer t
-  :init
-  (setq bookmark-default-value (expand-file-name "bookmarks"
-                                                 user-emacs-state-dir)))
+  :straight nil :defer t
+  :custom
+  (bookmark-default-file (expand-file-name "bookmarks" user-emacs-state-dir)))
 
 (use-package dired
+  :straight nil
   :hook (dired-mode . dired-hide-details-mode)
   :custom
   (dired-kill-when-opening-new-dired-buffer t)
-  (dired-dwim-target t)
   :config
-  (defun setup-dired-command ()
-    (cond ((or (memq system-type '(gnu gnu/linux gnu/kfreebsd))
-               (executable-find "gls"))
-           (progn
-             (when (executable-find "gls")
-               (setq insert-directory-program "gls"))
-             (setq dired-listing-switches "-alvF --group-directories-first")
-             (setq do-dired-subtree-hack t)))
-          ((eq system-type 'darwin)
-           ;; -F affects symbolic links on POSIX, but not darwin nor GNU it seems
-           (setq dired-listing-switches "-alF")
-           ;; -A switch is on BSD, but is not POSIX. I would add other BSDs to
-           ;; the predicate, but Darwin appears to be the only supported non-GNU
-           ;; BSD.
-           (setq do-dired-subtree-hack t))
-          ;; womp womp
-          (t
-           (setq dired-listing-switches "-al"))))
+  (defun dired-toggle-show-hidden-files ()
+    (interactive)
+    (with-current-buffer (current-buffer)
+      (let ((switches-split (string-split dired-actual-switches)))
+        (if (member "-a" switches-split)
+            (setq switches-split (delete "-a" switches-split))
+          (push "-a" switches-split))
+        (setq dired-actual-switches (string-join switches-split " "))
+        (revert-buffer))))
+
+  (when (executable-find "gls")
+    (setq insert-directory-program "gls"))
+
   ;; allow exec-path-to-shell to both run and initialize, but also set up if
   ;; it doesn't load. command changes are purely cosmetic.
-  (add-hook 'after-init-hook #'setup-dired-command))
+  (add-hook 'after-init-hook
+            (lambda ()
+              (cond ((or (memq system-type '(gnu gnu/linux gnu/kfreebsd))
+                         (equal insert-directory-program "gls"))
+                     (setq dired-listing-switches "-a -lvF --group-directories-first"))
+                    ((eq system-type 'darwin)
+                     ;; -F affects symbolic links on POSIX, but not darwin nor GNU it seems
+                     (setq dired-listing-switches "-a -lF"))
+                    ;; womp womp
+                    (t
+                     (setq dired-listing-switches "-a -l"))))))
 
-(use-package eshell
-  :defer t
-  :init
-  (setq eshell-directory-name (expand-file-name "eshell" user-emacs-state-dir))
-  (make-directory eshell-directory-name :parents)
-  (setq eshell-history-file-name (expand-file-name "eshell/history"
-                                                   user-emacs-state-dir)))
+(use-package esh-mode
+  :straight nil :defer t
+  :custom
+  (eshell-directory-name (expand-file-name "eshell" user-emacs-state-dir))
+  :config
+  (make-directory eshell-directory-name :parents))
+
+(use-package em-hist
+  :straight nil :defer t
+  :custom
+  (eshell-history-file-name (expand-file-name "eshell/history" user-emacs-state-dir))
+  :config
+  (make-directory eshell-history-file-name :parents))
+
+(use-package ibuffer
+  :straight nil
+  :bind ("C-x C-b" . ibuffer))
+
+(use-package ielm
+  :straight nil :defer t
+  :custom
+  (ielm-history-file-name (expand-file-name "ielm-history.eld" user-emacs-state-dir)))
+
+(use-package ido
+  :straight nil :defer t
+  :custom
+  (ido-save-directory-list-file (expand-file-name "ido.last" user-emacs-state-dir)))
+
+(use-package nsm
+  :straight nil :defer t
+  :custom
+  (nsm-settings-file (expand-file-name "network-security.data" user-emacs-data-dir)))
 
 (use-package tramp
-  :defer t
-  :init
-  (setq tramp-persistency-file-name (expand-file-name "tramp"
-                                                      user-emacs-state-dir)))
+  :straight nil :defer t
+  :custom
+  (tramp-persistency-file-name (expand-file-name "tramp" user-emacs-state-dir)))
 
 (use-package url
-  :defer t
-  :init
-  (setq url-configuration-directory (expand-file-name "url/"
-                                                      user-emacs-data-dir)))
+  :straight nil :defer t
+  :custom
+  (url-configuration-directory (expand-file-name "url/" user-emacs-data-dir)))
 
 
 
-;;; keyboard bindings
+;;; keyboard bindings:
 (use-package evil
   :straight t
-  :bind (("C-c [" . (lambda ()
-                      (interactive)
-                      (turn-on-evil-mode)
-                      (evil-normal-state)))
-         ("C-c ]" . turn-off-evil-mode))
   :custom
   (evil-want-integration t)
   (evil-want-keybinding nil)
-  (evil-want-C-u-scroll t)
   :hook (after-init . evil-mode)
   :config
   (evil-set-undo-system 'undo-redo))
@@ -232,35 +345,23 @@
     :config
     ;; builtin mode maps
     (evil-collection-init
-     '(calendar
-       custom
-       debug
-       diff-mode
-       dired
-       edebug
-       eshell
-       grep
-       help
-       image-dired
-       info
-       wdired))
-
-    ;; override dired change
-    (evil-define-key 'normal dired-mode-map "q" (lambda ()
-                                                  (interactive)
-                                                  (quit-window t)))
+     '(bookmark calendar custom debug diff-mode dired edebug eldoc eshell eww
+                gnus grep help ibuffer image-dired imenu info man org pdf tetris
+                wdired xref))
 
     ;; package mode maps
     (eval-after-load 'ement #'evil-collection-ement-setup)
+    (eval-after-load 'free-keys #'evil-collection-free-keys-setup)
     (eval-after-load 'ivy #'evil-collection-ivy-setup)
     (eval-after-load 'magit #'evil-collection-magit-setup))
 
-(use-package evil-dired
+(use-package shenso-evil
+  :straight nil
   :after evil
   :config
-  (evil-dired-setup)
+  (shenso-evil-init)
   (unless (featurep 'evil-collection)
-    (eval-after-load 'evil-collection #'evil-dired-setup)))
+    (eval-after-load 'evil-collection #'shenso-evil-dired-setup)))
 
 (use-package evil-org
     :straight t
@@ -272,17 +373,12 @@
     ;; we need to add the hook after setting org-agenda keys, not in :hook
     (add-hook 'org-mode #'evil-org-mode))
 
-(use-package evil-vterm ; homemade with love :)
-  :after (evil vterm)
-  :config
-  (evil-vterm-init))
-
 (use-package free-keys
   :straight '(free-keys :type git :host github :repo "Fuco1/free-keys"))
 
 
 
-;;; integrations
+;;; integrations:
 (use-package vterm
   :straight t
   :bind-keymap ("C-x v" . vterm-command-map)
@@ -305,6 +401,7 @@
   (define-key ctl-x-map "v" 'vterm-command-map))
 
 (use-package vterm-anchor ; homemade with love :)
+  :straight nil
   :after vterm
   :bind (:map vterm-command-map
               ("a" . toggle-vterm-anchor))
@@ -314,6 +411,7 @@
 
 (use-package exec-path-from-shell
   :straight t
+  :if (or (daemonp) (window-system))
   :config
   (exec-path-from-shell-initialize)
   (exec-path-from-shell-copy-env "SSH_AGENT_PID")
@@ -323,41 +421,56 @@
   :straight t
   :defer t
   :init
-  (setq transient-history-file (expand-file-name "transient/history.el"
-                                                 user-emacs-state-dir)
-        transient-levels-file (expand-file-name "transient/levels.el"
-                                                user-emacs-state-dir)
-        transient-values-file (expand-file-name "transient/values.el"
-                                                user-emacs-state-dir))
-  :config
-  ;; display git status buffer in current window
-  (setq magit-display-buffer-function
-        (lambda (buffer)
-          (display-buffer
-           buffer (if (and (derived-mode-p 'magit-mode)
-                           (not (memq (with-current-buffer buffer major-mode)
-                                      '(magit-process-mode
-                                        magit-revision-mode
-                                        magit-diff-mode
-                                        magit-stash-mode
-                                        magit-status-mode))))
-                      '(display-buffer-same-window)
-                    (cond ((eq (with-current-buffer buffer major-mode)
-                               'magit-status-mode)
-                           '(display-buffer-same-window))
-                          (t nil)))))))
+  (defun shenso-magit-display-buffer (buffer)
+    (let ((blacklist '(magit-process-mode
+                       magit-revision-mode
+                       magit-diff-mode
+                       magit-stash-mode))
+          (whitelist '(magit-status-mode))
+          (buffer-mode (with-current-buffer buffer major-mode)))
+      (display-buffer
+       buffer
+       (if (or (and (derived-mode-p 'magit-mode)
+                    (not (memq buffer-mode blacklist)))
+               (memq buffer-mode whitelist))
+           '(display-buffer-same-window)))))
+  :custom
+  (transient-history-file (expand-file-name "transient/history.el" user-emacs-state-dir))
+  (transient-levels-file (expand-file-name "transient/levels.el" user-emacs-state-dir))
+  (transient-values-file (expand-file-name "transient/values.el" user-emacs-state-dir))
+  (magit-display-buffer-function #'shenso-magit-display-buffer))
 
 (use-package lsp-bridge
   :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
             :files (:defaults "*.el" "*.py" "acm" "core" "langserver"
                               "multiserver" "resources")
             :build (:not compile))
-  :after (yasnippet)
-  :if (file-exists-p user-lsp-bridge-dir)
+  :after (markdown-mode yasnippet)
+  :if (and (file-exists-p user-lsp-bridge-venv-dir)
+           (file-exists-p (expand-file-name "bin/python" user-lsp-bridge-venv-dir))
+           (or (daemonp)
+               (window-system)
+               ;; should be available in Emacs 31
+               (featurep 'tty-child-frames)))
   :init
   (defun enable-lsp-bridge-if-local-file ()
     (unless (file-remote-p default-directory)
       (lsp-bridge-mode)))
+  (defun shenso-lsp-bridge-find-references ()
+    (interactive)
+    (cond ((eq major-mode 'emacs-lisp-mode)
+           (condition-case nil
+               (xref-find-references (thing-at-point 'symbol))
+             (error (message "No references found at point."))))
+          (t
+           (lsp-bridge-find-references))))
+  :bind (:map lsp-bridge-mode-map
+              ("C-l d"   . lsp-bridge-find-def)
+              ("C-l r"   . shenso-lsp-bridge-find-references)
+              ("C-l i"   . lsp-bridge-show-documentation)
+              ("C-l l"   . lsp-bridge-popup-complete-menu)
+              ("C-l C-l" . lsp-bridge-popup-complete-menu))
+
   :hook ((emacs-lisp-mode      . enable-lsp-bridge-if-local-file)
          (python-mode          . enable-lsp-bridge-if-local-file)
          (go-mode              . enable-lsp-bridge-if-local-file)
@@ -367,179 +480,151 @@
   :custom
   (acm-enable-copilot nil)
   (lsp-bridge-enable-hover-diagnostic t)
+  (lsp-bridge-c-lsp-server "clangd")
+  (lsp-bridge-python-command (expand-file-name "bin/python" user-lsp-bridge-venv-dir))
+
   :config
-  (require 'markdown-mode)
-  (setq lsp-bridge-enable-with-tramp nil)
-
-  (setq lsp-bridge-python-command
-        (expand-file-name ".venv/bin/python" user-lsp-bridge-dir))
   (require 'acm-backend-elisp)
-  (global-lsp-bridge-mode)
-
-  (defvar-keymap lsp-bridge-command-map
-    "d"   #'lsp-bridge-find-def
-    "r"   #'lsp-bridge-find-references
-    "i"   #'lsp-bridge-show-documentation
-    "l"   #'lsp-bridge-popup-complete-menu
-    "C-l" #'lsp-bridge-popup-complete-menu)
-  ;; do we really need the lasso?
-  (keymap-set help-map (kbd "l") lsp-bridge-command-map)
-  (with-eval-after-load 'evil
-    ;; zz does this anyhow
-    (evil-global-set-key 'normal (kbd "C-l") lsp-bridge-command-map)
-    (evil-global-set-key 'insert (kbd "C-l") lsp-bridge-command-map))
-
+  (setq lsp-bridge-enable-with-tramp nil)
   (add-to-list 'display-buffer-alist
                '("\\*lsp-bridge-doc\\*"
                  (display-buffer-use-least-recent-window)))
-
   ;; when the theme changes the autocomplete menu uses the old background color.
   ;; this lambda forcefully resets the face colors.
   (with-eval-after-load 'theme-timer
     (add-hook 'theme-timer-change-hook (lambda ()
                                          (acm-frame-init-colors t)))))
 
-(use-package dape
-  :straight t
-  :defer t
-  :init
-  (setq dape-prefix-key "\C-x\C-a")
-  :config
-  ;; Info buffers to the right
-  (setq dape-buffer-window-arrangement 'right)
-
-  ;; Info buffers like gud (gdb-mi)
-  (setq dape-buffer-window-arrangement 'gud)
-  (setq dape-info-hide-mode-line nil)
-
-  ;; Pulse source line (performance hit)
-  (add-hook 'dape-display-source-hook 'pulse-momentary-highlight-one-line)
-
-  ;; Showing inlay hints
-  (setq dape-inlay-hints t)
-
-  ;; Save buffers on startup, useful for interpreted languages
-  (add-hook 'dape-start-hook (lambda () (save-some-buffers t t)))
-
-  ;; Kill compile buffer on build success
-  (add-hook 'dape-compile-hook 'kill-buffer)
-
-  ;; Projectile users
-  (setq dape-cwd-function 'projectile-project-root))
+(use-package flymake
+  :straight nil
+  :hook (emacs-lisp-mode . flymake-mode)
+  :bind (:map flymake-mode-map
+              ("M-p" . flymake-goto-prev-error)
+              ("M-n" . flymake-goto-next-error)))
 
 (use-package ement
   :straight t
   :commands ement-connect)
 
+(use-package gnus
+  :straight nil
+  :custom
+  (gnus-select-method '(nnnil nil))
+  (gnus-secondary-select-methods '((nnml "")
+                                   (nnimap "imappro.zoho.com"
+                                           (nnimap-address "imappro.zoho.com")
+                                           (nnimap-server-port "993")
+                                           (nnimap-stream ssl))))
+  (gnus-posting-styles '(("imappro.zoho.com"
+                          ("X-Message-SMTP-Method"
+                           "smtp smtppro.zoho.com 587 shawn@shenso.name"))))
+
+  ;; move crap out of my home directory!!!!
+  (gnus-home-directory (expand-file-name "gnus" user-emacs-data-dir))
+  (gnus-directory (expand-file-name "gnus/news" user-emacs-data-dir))
+  (gnus-kill-files-directory (expand-file-name "gnus/news" user-emacs-data-dir))
+  (gnus-article-save-directory (expand-file-name "gnus/news" user-emacs-data-dir))
+  (gnus-cache-directory (expand-file-name "gnus" user-emacs-cache-dir))
+  (message-directory (expand-file-name "mail" user-emacs-data-dir))
+  (nnfolder-directory (expand-file-name "mail" user-emacs-data-dir))
+  (nnfolder-active-file (expand-file-name "mail/active" user-emacs-data-dir))
+  (nnfolder-newsgroups-file (expand-file-name "mail/newsgroups" user-emacs-data-dir)))
+
+(use-package smtpmail
+  :straight nil
+  :custom
+  (smtpmail-smtp-user                        "shawn@shenso.name")
+  (smtpmail-default-smtp-server              "smtppro.zoho.com")
+  (smtpmail-smtp-server                      "smtppro.zoho.com")
+  (smtpmail-smtp-service                     587)
+  (smtpmail-servers-requiring-authorization  "smtppro.zoho.com")
+  (smtpmail-stream-type                      'starttls)
+  (smtpmail-use-gnutls                       t)
+  (smtpmail-debug-info                       t))
+
 (use-package gptel
   :straight t
   :defer t
+  :custom
+  (gptel-directives
+   (or
+    (if (file-exists-p (expand-file-name "gptel-prompts.json"
+                                         user-emacs-directory))
+        (with-temp-buffer
+          (insert-file-contents (expand-file-name "gptel-prompts.json"
+                                                  user-emacs-directory))
+          (let ((data (json-parse-buffer))
+                (directives nil))
+            (maphash (lambda (key val)
+                       (push (cons (intern key) (string-join val "\n")) directives))
+                     data)
+            directives)))
+    gptel-directives))
   :config
-  (setq gptel-directives
-        `((default . ,(concat
-                       "You are a large language model living inside a GNU Emacs"
-                       " Buffer. Like all features in GNU Emacs you are designed"
-                       " to be helpful either with computer programming in"
-                       " general, programming in Emacs Lisp, or navigating,"
-                       " using, or understanding various aspects of GNU Emacs."
-                       ))))
-  (shenso-ensure-secrets)
-  (when (fboundp 'shenso-secrets-claude-api-key)
-        (setq gptel-model 'claude-3-7-sonnet-20250219)
-        (setq gptel-backend
-              (gptel-make-anthropic "Claude"
-                :stream t
-                :key 'shenso-secrets-claude-api-key))))
+  (when (personal-system-p)
+      (setq gptel-model 'claude-3-7-sonnet-20250219)
+      (setq gptel-backend
+            (gptel-make-anthropic "Claude"
+              :stream t
+              :protocol "https"
+              :key 'gptel-api-key))))
 
 
 
-;;; navigation/buffer completion
+;;; navigation/buffer completion:
 (use-package dired-subtree
-  :straight t)
+  :straight t
+  :after dired)
 
 (use-package dired-subtree-hack
+  :straight nil
   :after dired-subtree
-  :if (or (eq system-type 'gnu/linux) (executable-find "gls")))
+  ;; -A switch is on BSD, but is not POSIX. I would add other BSDs to
+  ;; the predicate, but Darwin appears to be the only supported non-GNU
+  ;; BSD.
+  :if (or (memq system-type '(gnu gnu/linux gnu/kfreebsd darwin))
+          (executable-find "gls"))
+  :config
+  ;; allow exec-path-to-shell to both run and initialize, but also set up if
+  ;; it doesn't load. command changes are purely cosmetic.
+  (add-hook 'after-init-hook #'install-dired-subtree-hack))
 
 (use-package ivy
   :straight t
   :config
   (ivy-mode))
 
-(use-package projectile
-  :straight t
-  :bind-keymap (("C-c p" . projectile-command-map)
-                ("s-p"   . projectile-command-map))
+(use-package project
+  :straight nil
+  :bind-keymap ("C-c p" . project-prefix-map)
   :custom
-  (projectile-switch-project-action #'projectile-dired)
-  :init
-  (setq project-mode-line "Projectile") ; avoid tramp overhead
-  :config
-  (setq projectile-key
-        (cond ((eq system-type 'darwin) (kbd "s-p"))
-              (t                        (kbd "C-c p"))))
-  (setq projectile-project-search-path (list user-projects-dir)
-        projectile-cache-file          (expand-file-name
-                                        "projectile.cache"
-                                        user-emacs-state-dir)
-        projectile-known-projects-file (expand-file-name
-                                        "projectile-known-projects.eld"
-                                        user-emacs-state-dir))
-
-  ;; avoid activity on tramp
-  (defadvice projectile-project-root (around ignore-remote first activate)
-    (unless (file-remote-p default-directory)
-      ad-do-it))
-
-  ;; ignore packages with git directories
-  (setq shenso-ignore-project-paths
-        `(,(expand-file-name "straight/" user-emacs-data-dir)))
-  (defun shenso-ignore-project-p (file)
-    (if (file-remote-p file)
-        t
-      (progn
-        (let* ((abs-file-name (expand-file-name file))
-               (file-parts (file-name-split abs-file-name))
-               (num-file-parts (length file-parts))
-               (ignore-path-found nil)
-               (tail shenso-ignore-project-paths))
-          (while (and tail (not ignore-path-found))
-            (let* ((v (car tail))
-                   (path-parts (-butlast (file-name-split v)))
-                   (num-path-parts (length path-parts)))
-              (unless (> num-path-parts num-file-parts)
-                (setq ignore-path-found
-                      (equal path-parts (take num-path-parts file-parts))))
-              (setq tail (cdr tail))))
-          ignore-path-found))))
-    (setq projectile-ignored-project-function #'shenso-ignore-project-p)
-
-  (projectile-global-mode)
-  (projectile-discover-projects-in-search-path)
-  (define-key projectile-mode-map projectile-key 'projectile-command-map))
+  (project-list-file (expand-file-name "projects" user-emacs-state-dir))
+  (project-mode-line "Project"))
 
 (use-package shenso-windowing
-  :config
-  (setq split-window-preferred-function #'split-window-insensibly))
+  :straight nil
+  :custom
+  (split-window-preferred-function split-window-insensibly))
 
 (use-package yasnippet
   :straight t
+  :custom
+  (yas-snippet-dirs (list (expand-file-name "snippets" user-emacs-data-dir)))
   :config
   (yas-global-mode))
 
 
-;;; major modes
+;;; major modes:
 
 ;; prog-mode derivatives
 (use-package cc-mode
   :defer t
-  :init
-  (setq-default c-default-style
-                '((c-mode . "k&r")
-                  (c++-mode . "k&r")
-                  (csharp-mode . "bsd")
-                  (other . "java")))
-  (setq-default c-basic-offset 4))
+  :custom
+  (c-default-style '((c-mode      . "k&r")
+                     (c++-mode    . "k&r")
+                     (csharp-mode . "bsd")
+                     (other       . "java")))
+  (c-basic-offset 4))
 
 (use-package dart-mode
   :straight t
@@ -563,7 +648,8 @@
   :mode ("\\.ts\\'"))
 
 (use-package bigquery
-  :straight '(bigquery :type git :host github :repo "shenso/bigquery.el"))
+  :straight '(bigquery :type git :host github :repo "shenso/bigquery.el")
+  :if (member (system-name) (cons "plato" work-systems)))
 
 (use-package sql-indent
   :straight t
@@ -583,6 +669,8 @@
   :hook ((csv-mode tsv-mode) . csv-align-mode))
 
 (use-package csv-rainbow
+  :straight nil
+  :defer t
   :after csv-mode)
 
 (use-package markdown-mode
@@ -592,61 +680,69 @@
 (use-package yaml-mode
   :straight t
   :mode ("\\.yaml\\'" "\\.yml\\'")
-  :config
-  (add-hook 'yaml-mode-hook #'display-line-numbers-mode))
+  :hook (yaml-mode-hook . display-line-numbers-mode))
 
 (use-package org
+  :straight nil
   :hook ((org-mode . variable-pitch-mode)
          (org-mode . visual-line-mode))
   :bind (("C-c a" . org-agenda)
          ("C-c c" . org-capture))
-  :config
-  ;; capture templates
-  (setq org-capture-templates nil)
-  (when user-documents-dir
-    (when (member system-name work-systems)
-      (add-to-list 'org-capture-templates
-            `("m" "Meeting"
-               entry (file+headline
-                      ,(expand-file-name "meetings.org" user-documents-dir)
-                      "Meetings")
-               "* %U %?")))
-    (when (member system-name personal-systems)
-      (add-to-list 'org-capture-templates
-                   `("j" "Journal Entry"
-                     entry (file+olp+datetree
-                            ,(expand-file-name "journal.gpg" user-documents-dir))
-                     "* %<%Y-%m-%d %A %H:%M:%S> - %?" :empty-lines 1)))))
+  :custom
+  (org-capture-templates
+   `(,@(if (work-system-p)
+           `(("m" "Meeting" entry
+              (file+headline ,(expand-file-name "meetings.org" user-documents-dir)
+                             "Meetings")
+              "* %U %?")))
+     ,@(if (personal-system-p)
+           `(("j" "Journal Entry" entry
+              (file+olp+datetree ,(expand-file-name "journal.gpg" user-documents-dir)
+                                 "* %<%Y-%m-%d %A %H:%M:%S> - %?" ::empty-lines 1)))))))
 
 
 
-;;; appearance
+;;; appearance:
 (use-package nordic-night-theme
-  :straight t)
+  :straight t
+  :config
+  (when (daemonp)
+    (let (load-nordic-theme)
+      (setq load-nordic-theme
+            (lambda ()
+              (when (nordic-night--fullcolorp)
+                (load-theme 'nordic-night t)
+                (when (featurep 'theme-timer)
+                  (theme-timer-use-time-appropriate-theme))
+                (remove-hook 'server-after-make-frame-hook load-nordic-theme))))
+      (add-hook 'server-after-make-frame-hook load-nordic-theme))))
 
 (use-package modus-themes
   :straight t
   :if (< emacs-major-version 30))
 
 (use-package theme-timer
+  :straight nil
   :after nordic-night-theme
   :custom
   (theme-timer-day-time-theme 'modus-operandi-tritanopia)
   (theme-timer-night-time-theme 'nordic-night)
   :config
-  (if (daemonp)
-      (call-on-client-frame-init theme-timer-init)
-    (add-hook 'after-init-hook #'theme-timer-init)))
+  (call-on-client-frame-init #'theme-timer-init))
 
 (use-package shenso-font-theme
+  :straight nil
   :config
-  (load-theme 'shenso-font t))
+  (call-on-client-frame-init #'reload-shenso-font))
 
 (use-package org-pretty-theme ; homemade with love :)
-  :after theme-timer
+  :straight nil
+  :defer nil
+  :after org
   :config
-  (add-hook 'theme-timer-change-hook #'reload-org-pretty)
-  (enable-theme 'org-pretty))
+  (load-theme 'org-pretty t)
+  (with-eval-after-load 'theme-timer
+    (add-hook 'theme-timer-change-hook #'org-pretty-reload)))
 
 (use-package all-the-icons
   :straight t
@@ -661,26 +757,34 @@
 (use-package nyan-mode
   :straight t
   :after theme-timer
-  :init
-  (setq nyan-minimum-window-length 120
-        nyan-wavy-trail t)
+  :custom
+  (nyan-minimum-window-width 64)
+  (nyan-wavy-trail t)
   :config
-  (defun setup-nyan-mode ()
+  (defun maybe-toggle-nyan-mode ()
     (if (memq theme-timer-night-time-theme custom-enabled-themes)
         (progn
           (nyan-mode 1)
           (nyan-start-animation))
       (nyan-mode -1)))
-  (setup-nyan-mode)
-  (add-hook 'theme-timer-change-hook #'setup-nyan-mode))
+  (maybe-toggle-nyan-mode)
+  (add-hook 'theme-timer-change-hook #'maybe-toggle-nyan-mode))
 
 (use-package diminish
   :straight t
   :config
-  (let ((target-modes '((projectile      . projectile-mode)
-                        (yasnippet       . yas-minor-mode)
+  (let ((target-modes '((yasnippet       . yas-minor-mode)
                         (ivy             . ivy-mode)
                         (evil-collection . evil-collection-unimpaired-mode))))
     (dolist (target-mode target-modes)
       (with-eval-after-load (car target-mode)
         (diminish (cdr target-mode))))))
+
+;;; stuff im working on:
+(defvar asyncio-dir (expand-file-name "asyncio.el/" user-projects-dir))
+(use-package asyncio
+  :straight nil
+  :if (file-exists-p asyncio-dir)
+  :load-path asyncio-dir)
+
+;;; init.el ends here

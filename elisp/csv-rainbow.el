@@ -154,6 +154,7 @@
             keywords))
     keywords))
 
+;;;###autoload
 (define-minor-mode csv-rainbow-mode
   "Toggle the display of colored columns in csv/tsv mode buffers."
   :lighter nil
@@ -183,3 +184,4 @@
     (font-lock-fontify-buffer)))
 
 (provide 'csv-rainbow)
+;;; csv-rainbow.el ends here

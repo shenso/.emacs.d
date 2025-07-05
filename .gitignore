@@ -2,8 +2,14 @@ auto-save-list/
 eln-cache/
 elpa/
 eshell/
+
+# packages that don't let you change their file paths are evil
+multisession/
+persist/
 transient/
+
 tramp
 
 custom.el
 secrets.el.gpg
+gptel-prompts.json

@@ -21,7 +21,7 @@
 
 (require 'dired)
 
-(defconst striaght-install-url
+(defconst straight-install-url
   (concat "https://raw.githubusercontent.com/radian-software/straight.el/"
           "develop/install.el"))
 (defconst straight-bootstrap-rel-path
@@ -55,7 +55,7 @@ EMACS-DATA-DIR is the directory in which packages should be installed."
     (unless (file-exists-p bootstrap-file)
       (with-current-buffer
           (url-retrieve-synchronously
-
+	   straight-install-url
            'silent 'inhibit-cookies)
         (goto-char (point-max))
         (eval-print-last-sexp)))

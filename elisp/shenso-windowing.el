@@ -1,4 +1,4 @@
-;;; shenso-windowing.el by Shawn Henson
+;;; shenso-windowing.el by Shawn Henson -*- lexical-binding: t -*-
 
 ;; To the extent possible under law, the person who associated CC0 with
 ;; shenso-windowing.el has waived all copyright and related or neighboring rights

@@ -1,4 +1,4 @@
-;;; shenso-font-theme.el by Shawn Henson
+;;; shenso-font-theme.el by Shawn Henson -*- lexical-binding: t -*-
 
 ;; To the extent possible under law, the person who associated CC0 with
 ;; shenso-font-theme.el has waived all copyright and related or neighboring rights

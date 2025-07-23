@@ -143,7 +143,7 @@
 
 ;;; Custom system classifications:
 (defcustom personal-systems
-  '("plato")
+  '("plato" "aristotle.local")
   "Systems used for personal computing."
   :type '(set string)
   :group 'shenso-systems)
@@ -151,6 +151,12 @@
 (defcustom work-systems
   '("smith.local")
   "Systems owned by an employer, or used solely for business purposes."
+  :type '(set string)
+  :group 'shenso-systems)
+
+(defcustom school-systems
+  '("aristotle.local")
+  "Systems used for school: lecture notes, homework, etc."
   :type '(set string)
   :group 'shenso-systems)
 
@@ -178,6 +184,9 @@
 
 (define-inline personal-system-p ()
   (inline-quote (member (system-name) personal-systems)))
+
+(define-inline school-system-p ()
+  (inline-quote (member (system-name) school-systems)))
 
 ;;;; Package configurations:
 
@@ -245,6 +254,12 @@
                 (when (and (string= (buffer-name) "*scratch*")
                            (not (buffer-file-name)))
                   (display-about-screen))))))
+
+(use-package ns-win
+  :straight nil
+  :custom
+  (mac-command-modifier 'meta)
+  (mac-option-modifier 'super))
 
 (use-package bookmark
   :straight nil :defer t
@@ -435,9 +450,12 @@
                (memq buffer-mode whitelist))
            '(display-buffer-same-window)))))
   :custom
-  (transient-history-file (expand-file-name "transient/history.el" user-emacs-state-dir))
-  (transient-levels-file (expand-file-name "transient/levels.el" user-emacs-state-dir))
-  (transient-values-file (expand-file-name "transient/values.el" user-emacs-state-dir))
+  (transient-history-file (expand-file-name "transient/history.el"
+                                            user-emacs-state-dir))
+  (transient-levels-file (expand-file-name "transient/levels.el"
+                                           user-emacs-state-dir))
+  (transient-values-file (expand-file-name "transient/values.el"
+                                           user-emacs-state-dir))
   (magit-display-buffer-function #'shenso-magit-display-buffer))
 
 (use-package lsp-bridge
@@ -481,7 +499,8 @@
   (acm-enable-copilot nil)
   (lsp-bridge-enable-hover-diagnostic t)
   (lsp-bridge-c-lsp-server "clangd")
-  (lsp-bridge-python-command (expand-file-name "bin/python" user-lsp-bridge-venv-dir))
+  (lsp-bridge-python-command (expand-file-name "bin/python"
+                                               user-lsp-bridge-venv-dir))
 
   :config
   (require 'acm-backend-elisp)
@@ -559,7 +578,7 @@
                        (push (cons (intern key) (string-join val "\n")) directives))
                      data)
             directives)))
-    gptel-directives))
+    nil))
   :config
   (when (personal-system-p)
       (setq gptel-model 'claude-3-7-sonnet-20250219)
@@ -604,7 +623,7 @@
 (use-package shenso-windowing
   :straight nil
   :custom
-  (split-window-preferred-function split-window-insensibly))
+  (split-window-preferred-function #'split-window-insensibly))
 
 (use-package yasnippet
   :straight t
@@ -677,8 +696,7 @@
   :after csv-mode)
 
 (use-package markdown-mode
-  :straight t
-  :defer t)
+  :straight t)
 
 (use-package yaml-mode
   :straight t
@@ -691,17 +709,50 @@
          (org-mode . visual-line-mode))
   :bind (("C-c a" . org-agenda)
          ("C-c c" . org-capture))
+  :init
+  (defun build-course-capture-template (course-path index)
+    (list (concat "c" (int-to-string index))
+          (concat (file-name-base course-path) " Lecture Notes")
+          'entry
+          (list 'file+olp+datetree
+                (expand-file-name "lectures.org" course-path))
+          "* %<%Y-%m-%d> - %?"
+          :tree-type 'month
+          :empty-lines 1))
+
+  (defun build-course-capture-templates ()
+    (let* ((courses-path (expand-file-name "Courses/Active/" user-documents-dir))
+           (files (ignore-error file-missing
+                    (directory-files courses-path
+                                     nil
+                                     directory-files-no-dot-files-regexp)))
+           (file-paths (mapcar
+                        (lambda (file)
+                          (expand-file-name file courses-path))
+                        files)))
+      (append
+       (list (list "c" "Course Lecture Notes"))
+       (seq-map-indexed #'build-course-capture-template
+                        (seq-filter #'file-directory-p file-paths)))))
   :custom
   (org-capture-templates
    `(,@(if (work-system-p)
            `(("m" "Meeting" entry
-              (file+headline ,(expand-file-name "meetings.org" user-documents-dir)
+              (file+headline ,(expand-file-name "meetings.org"
+                                                user-documents-dir)
                              "Meetings")
               "* %U %?")))
      ,@(if (personal-system-p)
            `(("j" "Journal Entry" entry
-              (file+olp+datetree ,(expand-file-name "journal.gpg" user-documents-dir)
-                                 "* %<%Y-%m-%d %A %H:%M:%S> - %?" ::empty-lines 1)))))))
+              (file+olp+datetree ,(expand-file-name "journal.gpg"
+                                                    user-documents-dir)
+                                 "* %<%Y-%m-%d %A %H:%M:%S> - %?"
+                                 ::empty-lines 1))))
+     ,@(if (school-system-p)
+           (build-course-capture-templates))))
+  (org-blank-before-new-entry '((heading . auto)
+                                (plain-list-item . nil)))
+  (org-cycle-separator-lines 1))
 
 
 

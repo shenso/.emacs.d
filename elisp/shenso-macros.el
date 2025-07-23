@@ -1,4 +1,4 @@
-;;; shenso-macros.el by Shawn Henson
+;;; shenso-macros.el by Shawn Henson -*- lexical-binding: t -*-
 
 ;; To the extent possible under law, the person who associated CC0 with
 ;; macros.el has waived all copyright and related or neighboring rights
